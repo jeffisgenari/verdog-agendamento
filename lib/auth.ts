@@ -46,6 +46,41 @@ export const authOptions: AuthOptions = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   callbacks: {
+    // Por padrão o NextAuth recusa login Google quando já existe uma conta
+    // com o mesmo e-mail criada por senha (erro OAuthAccountNotLinked) — é
+    // uma trava de segurança genérica. Como o Google já confirma que o
+    // e-mail é mesmo da pessoa (email_verified), vinculamos automaticamente
+    // em vez de bloquear.
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google" || !user.email) return true;
+
+      const googleProfile = profile as { email_verified?: boolean } | undefined;
+      if (!googleProfile?.email_verified) return true;
+
+      const existente = await prisma.user
+        .findUnique({ where: { email: user.email }, include: { accounts: true } })
+        .catch(() => null);
+
+      if (existente && !existente.accounts.some((a) => a.provider === "google")) {
+        await prisma.account.create({
+          data: {
+            userId: existente.id,
+            type: account.type,
+            provider: account.provider,
+            providerAccountId: account.providerAccountId,
+            access_token: account.access_token,
+            refresh_token: account.refresh_token,
+            expires_at: account.expires_at,
+            token_type: account.token_type,
+            scope: account.scope,
+            id_token: account.id_token,
+            session_state: account.session_state as string | undefined,
+          },
+        });
+      }
+
+      return true;
+    },
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
