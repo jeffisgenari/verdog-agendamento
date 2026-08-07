@@ -29,7 +29,13 @@
       "Bash(node --env-file=.env seed-fotos.js)",
       "Bash(npm run *)",
       "Bash(git ls-tree *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(where gh *)",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(git-credential-manager github *)",
+      "Bash(git credential *)"
     ]
   }
 }
