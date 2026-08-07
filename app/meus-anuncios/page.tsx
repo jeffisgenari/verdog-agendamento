@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AppHeader from "@/components/AppHeader";
 import IconEditar from "@/components/IconEditar";
+import PausarBotao from "@/components/PausarBotao";
 
 const STATUS_ANUNCIO_LABEL: Record<string, { label: string; className: string }> = {
   PENDENTE: { label: "Em análise", className: "bg-amber-50 text-amber-700" },
@@ -43,16 +44,18 @@ export default async function MeusAnuncios() {
           </li>
         )}
         {anuncios.map((a) => {
-          const status = STATUS_ANUNCIO_LABEL[a.status] ?? {
-            label: a.status,
-            className: "bg-neutral-100 text-neutral-500",
-          };
+          const status = a.pausado
+            ? { label: "Pausado", className: "bg-neutral-100 text-neutral-500" }
+            : STATUS_ANUNCIO_LABEL[a.status] ?? {
+                label: a.status,
+                className: "bg-neutral-100 text-neutral-500",
+              };
           return (
-            <li key={a.id}>
-              <Link
-                href={`/anuncios/${a.id}/editar`}
-                className="relative flex gap-3 border border-neutral-100 rounded-2xl p-2"
-              >
+            <li
+              key={a.id}
+              className="flex gap-2 border border-neutral-100 rounded-2xl p-2"
+            >
+              <Link href={`/anuncios/${a.id}/editar`} className="flex gap-3 flex-1 min-w-0">
                 <div className="w-20 h-20 rounded-xl bg-verdog-light flex-shrink-0 overflow-hidden">
                   {a.fotos[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -72,11 +75,18 @@ export default async function MeusAnuncios() {
                     {status.label}
                   </span>
                 </div>
-                <span className="absolute bottom-2 right-2 flex items-center gap-1 bg-verdog text-white text-[10px] font-medium rounded-full pl-1.5 pr-2 py-1 shadow">
-                  <IconEditar className="w-3 h-3" />
-                  Editar
-                </span>
               </Link>
+
+              <div className="flex flex-col items-end justify-between flex-shrink-0 py-0.5">
+                <PausarBotao anuncioId={a.id} pausadoInicial={a.pausado} />
+                <Link
+                  href={`/anuncios/${a.id}/editar`}
+                  className="flex items-center gap-1 bg-verdog text-white text-xs font-medium rounded-full px-3 py-1"
+                >
+                  <IconEditar className="w-3.5 h-3.5" />
+                  Editar
+                </Link>
+              </div>
             </li>
           );
         })}

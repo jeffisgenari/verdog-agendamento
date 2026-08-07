@@ -4,6 +4,9 @@ import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 export const metadata = {
   title: "Verdog | Agendamento",
   description: "Encontre passeadores, adestradores e hospedagem para seu pet",
+  icons: {
+    icon: "/fav.png",
+  },
 };
 
 export default function RootLayout({

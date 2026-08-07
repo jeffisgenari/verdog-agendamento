@@ -14,7 +14,7 @@ export default async function PerfilProfissional({
     include: {
       user: true,
       anuncios: {
-        where: { status: "APROVADO" },
+        where: { status: "APROVADO", pausado: false },
         include: { fotos: true, profissional: { include: { user: true } } },
         orderBy: { criadoEm: "desc" },
       },

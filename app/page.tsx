@@ -40,6 +40,7 @@ export default async function Home({
     .findMany({
       where: {
         status: "APROVADO",
+        pausado: false,
         ...(tipo && tipo !== "TODOS" ? { tipoServico: tipo as any } : {}),
       },
       include: { fotos: true, profissional: { include: { user: true } } },

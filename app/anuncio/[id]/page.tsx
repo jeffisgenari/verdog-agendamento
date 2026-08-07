@@ -33,7 +33,7 @@ export default async function PaginaAnuncio({
     },
   });
 
-  if (!anuncio || anuncio.status !== "APROVADO") notFound();
+  if (!anuncio || anuncio.status !== "APROVADO" || anuncio.pausado) notFound();
 
   const ehHospedagem = anuncio.tipoServico === "HOSPEDAGEM";
 

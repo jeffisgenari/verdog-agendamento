@@ -148,6 +148,9 @@ model Anuncio {
   // com quintal cercado").
   localHospedagem String?
   status          StatusAnuncio   @default(PENDENTE)
+  // O profissional pausa/retoma quando quiser, sem precisar de aprovação —
+  // enquanto pausado, o anúncio some da home e do perfil público.
+  pausado         Boolean         @default(false)
   fotos           Foto[]
   disponibilidades Disponibilidade[]
   agendamentos    Agendamento[]
