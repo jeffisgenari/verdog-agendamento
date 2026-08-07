@@ -88,7 +88,9 @@ export default async function PaginaAnuncio({
         preco={anuncio.preco}
         tipoServico={anuncio.tipoServico}
         usuarioLogado={
-          usuarioLogado ? { nome: usuarioLogado.name, telefone: usuarioLogado.telefone } : null
+          usuarioLogado
+            ? { nome: usuarioLogado.name, telefone: usuarioLogado.telefone, cpf: usuarioLogado.cpf }
+            : null
         }
         loginUrl={`/login?callbackUrl=${encodeURIComponent(`/anuncio/${anuncio.id}`)}`}
         disponibilidades={

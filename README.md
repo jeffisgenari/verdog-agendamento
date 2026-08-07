@@ -38,29 +38,36 @@ Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
   Cartão de crédito ainda não existe.
 - Perfil público do profissional, avatar de usuário (upload ou vindo do
   Google), cabeçalho padrão (logo clicável + menu) em toda página
+- Rodapé em toda página: logo, WhatsApp e Instagram, e link pra Política de
+  Privacidade (`app/politica-de-privacidade`)
+- **Recuperação de senha** ("Esqueci minha senha" no login) e **verificação
+  de e-mail** (link enviado no cadastro, com opção de reenviar em "Meus
+  dados") — e-mails enviados via Resend (`lib/email.ts`). Contas Google já
+  entram verificadas automaticamente. Testado de ponta a ponta.
 - Favicon configurado
 
 ## O que falta (próximos passos)
 
-1. **Colocar as variáveis do Pagar.me no Vercel** — o código já está pronto,
-   testado e o webhook já está cadastrado no painel do Pagar.me (evento
-   `charge.paid` e `charge.payment_failed`, apontando pra
-   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`). Só falta
-   levar pro Vercel (Configurações do projeto → Environment Variables,
-   ambiente Production) as 3 variáveis que já estão no `.env.local` local:
-   `PAGARME_SECRET_KEY`, `PAGARME_WEBHOOK_USER` e `PAGARME_WEBHOOK_PASSWORD`
-   (usuário/senha — não é assinatura, é Basic Auth mesmo, configurado na
-   criação do webhook em Webhooks → editar → Habilitar autenticação).
-2. **Cartão de crédito como forma de pagamento adicional** (opcional) —
+1. **Colocar as variáveis do Pagar.me e do Resend no Vercel** — o código já
+   está pronto e testado localmente. Faltam, em Environment Variables
+   (ambiente Production), as variáveis que já estão no `.env.local` local:
+   `PAGARME_SECRET_KEY`, `PAGARME_WEBHOOK_USER`, `PAGARME_WEBHOOK_PASSWORD`
+   (webhook do Pagar.me já cadastrado, aponta pra
+   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`) e
+   `RESEND_API_KEY`.
+2. **Verificar um domínio no Resend** (resend.com/domains) — sem isso, os
+   e-mails de recuperação de senha/verificação só chegam pro e-mail da
+   própria conta Resend, não pros clientes de verdade. Depois de verificar,
+   define `RESEND_FROM_EMAIL` (ex: `"Verdog <contato@verdog.com.br>"`).
+3. **Cartão de crédito como forma de pagamento adicional** (opcional) —
    hoje só tem Pix. Cartão exige um script do Pagar.me na página pra
    tokenizar o cartão sem o número passar pelo nosso servidor.
-3. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
+4. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
    projeto.
-4. Itens menores: recuperação de senha, verificação de e-mail,
-   notificações automáticas (hoje é só WhatsApp manual), avaliações de
-   profissionais, armazenamento de fotos num serviço de verdade (hoje
-   ficam comprimidas dentro do próprio banco — funciona, mas não escala
-   indefinidamente).
+5. Itens menores (deliberadamente adiados): notificações automáticas (hoje
+   é só WhatsApp manual) e avaliações de profissionais — mais
+   armazenamento de fotos num serviço de verdade (hoje ficam comprimidas
+   dentro do próprio banco — funciona, mas não escala indefinidamente).
 
 ## Como colocar no ar (passo a passo, sem precisar saber programar)
 

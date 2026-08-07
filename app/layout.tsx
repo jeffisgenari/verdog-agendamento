@@ -1,5 +1,6 @@
 import "./globals.css";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Verdog | Agendamento",
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className="bg-white text-neutral-900">
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <Footer />
       </body>
     </html>
   );

@@ -241,7 +241,7 @@ export default function NovoAnuncioForm() {
             type="text"
             value={local}
             onChange={(e) => setLocal(e.target.value)}
-            placeholder="Ex: Vila Mariana"
+            placeholder="Ex: Copacabana"
             className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
           />
         </label>

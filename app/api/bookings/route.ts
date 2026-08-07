@@ -17,17 +17,18 @@ export async function POST(req: NextRequest) {
   const clienteId = session.user.id;
 
   const body = await req.json();
-  const { anuncioId, disponibilidadeId, checkin, checkout, clienteNome, clienteContato, clienteCpf } = body;
+  const { anuncioId, disponibilidadeId, checkin, checkout, clienteNome, clienteContato } = body;
 
-  if (!anuncioId || !clienteNome || !clienteContato || !clienteCpf) {
+  if (!anuncioId || !clienteNome || !clienteContato || !body.clienteCpf) {
     return NextResponse.json({ erro: "Dados incompletos." }, { status: 400 });
   }
-  if (!cpfValido(clienteCpf)) {
+  if (!cpfValido(body.clienteCpf)) {
     return NextResponse.json({ erro: "CPF inválido." }, { status: 400 });
   }
+  const clienteCpf: string = body.clienteCpf.replace(/\D/g, "");
 
   const anuncio = await prisma.anuncio.findUnique({ where: { id: anuncioId } });
-  if (!anuncio) {
+  if (!anuncio || anuncio.status !== "APROVADO" || anuncio.pausado) {
     return NextResponse.json({ erro: "Anúncio não encontrado." }, { status: 404 });
   }
 

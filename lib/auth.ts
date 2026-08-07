@@ -79,6 +79,16 @@ export const authOptions: AuthOptions = {
         });
       }
 
+      // Marca o e-mail como verificado (o Google já confirmou) — vale tanto
+      // pra quem acabou de linkar a conta acima quanto pra um cadastro novo
+      // via Google, que o adapter já criou antes desse callback rodar.
+      await prisma.user
+        .updateMany({
+          where: { email: user.email, emailVerified: null },
+          data: { emailVerified: new Date() },
+        })
+        .catch(() => null);
+
       return true;
     },
     async jwt({ token, user, trigger }) {

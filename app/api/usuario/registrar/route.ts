@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { cpfValido } from "@/lib/cpf";
+import { criarToken } from "@/lib/tokens";
+import { enviarEmailVerificacao } from "@/lib/email";
 
 export async function POST(request: Request) {
-  const { nome, email, telefone, senha, endereco, numero, complemento } =
+  const { nome, email, telefone, cpf, senha, endereco, numero, complemento } =
     await request.json();
 
-  const obrigatorios = { nome, email, telefone, senha, endereco, numero };
+  const obrigatorios = { nome, email, telefone, cpf, senha, endereco, numero };
   for (const [campo, valor] of Object.entries(obrigatorios)) {
     if (typeof valor !== "string" || !valor.trim()) {
       return NextResponse.json(
@@ -14,6 +17,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+  }
+  if (!cpfValido(cpf)) {
+    return NextResponse.json({ error: "CPF inválido." }, { status: 400 });
   }
 
   const emailNormalizado = email.trim().toLowerCase();
@@ -42,6 +48,7 @@ export async function POST(request: Request) {
       name: nome.trim(),
       email: emailNormalizado,
       telefone: telefone.trim(),
+      cpf: cpf.replace(/\D/g, ""),
       senhaHash,
       endereco: endereco.trim(),
       numero: numero.trim(),
@@ -49,5 +56,15 @@ export async function POST(request: Request) {
     },
   });
 
+  // Não deixa a criação da conta falhar por causa do e-mail — a pessoa pode
+  // pedir pra reenviar depois em "Meus dados".
+  await enviarEmailDeVerificacao(emailNormalizado).catch(() => null);
+
   return NextResponse.json({ ok: true });
+}
+
+async function enviarEmailDeVerificacao(email: string) {
+  const token = await criarToken(email, "VERIFICACAO_EMAIL");
+  const link = `${process.env.NEXTAUTH_URL}/verificar-email?token=${token}`;
+  await enviarEmailVerificacao(email, link);
 }

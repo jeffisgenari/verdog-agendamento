@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { cancelarAgendamento } from "@/lib/agendamentos";
+import { criarNotificacao } from "@/lib/notificacoes";
 
 // O Pagar.me chama esta rota quando o status de uma cobrança muda.
 // Autenticado por usuário/senha (Basic Auth) — configurado na criação do
@@ -50,8 +51,13 @@ export async function POST(req: NextRequest) {
   }
 
   const corpoBruto = await req.text();
-  const evento = JSON.parse(corpoBruto);
-  const cobranca = evento?.data;
+  let evento: unknown;
+  try {
+    evento = JSON.parse(corpoBruto);
+  } catch {
+    return NextResponse.json({ erro: "JSON inválido." }, { status: 400 });
+  }
+  const cobranca = (evento as { data?: any })?.data;
   const agendamentoId: string | undefined =
     cobranca?.metadata?.agendamentoId ?? cobranca?.order?.metadata?.agendamentoId;
 
@@ -59,7 +65,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ recebido: true });
   }
 
-  const agendamento = await prisma.agendamento.findUnique({ where: { id: agendamentoId } });
+  const agendamento = await prisma.agendamento.findUnique({
+    where: { id: agendamentoId },
+    include: { anuncio: { include: { profissional: true } } },
+  });
   if (!agendamento || agendamento.status !== "AGUARDANDO_PAGAMENTO") {
     return NextResponse.json({ recebido: true });
   }
@@ -75,14 +84,35 @@ export async function POST(req: NextRequest) {
         data: { status: cobranca.status, idTransacaoPagarme: cobranca.id },
       }),
     ]);
+
+    // Notificação é melhor-esforço — não pode derrubar a confirmação do
+    // pagamento se falhar por algum motivo.
+    const titulo = agendamento.anuncio.titulo;
+    if (agendamento.clienteId) {
+      await criarNotificacao({
+        userId: agendamento.clienteId,
+        tipo: "RESERVA_CONFIRMADA",
+        titulo: "Pagamento confirmado!",
+        mensagem: `Sua reserva de "${titulo}" foi confirmada.`,
+        link: "/meus-pedidos",
+      }).catch(() => null);
+    }
+    if (agendamento.anuncio.profissional.userId) {
+      await criarNotificacao({
+        userId: agendamento.anuncio.profissional.userId,
+        tipo: "RESERVA_CONFIRMADA",
+        titulo: "Nova reserva confirmada!",
+        mensagem: `${agendamento.clienteNome} confirmou o pagamento de "${titulo}".`,
+        link: "/meus-clientes",
+      }).catch(() => null);
+    }
   } else if (STATUS_FALHOU.includes(cobranca.status)) {
-    await cancelarAgendamento(agendamento);
-    await prisma.pagamento
-      .update({
+    await cancelarAgendamento(agendamento, [
+      prisma.pagamento.update({
         where: { agendamentoId },
         data: { status: cobranca.status },
-      })
-      .catch(() => null);
+      }),
+    ]);
   }
 
   return NextResponse.json({ recebido: true });

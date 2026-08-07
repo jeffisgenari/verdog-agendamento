@@ -63,7 +63,7 @@ export default async function MeusClientes() {
               <div className="flex items-center justify-between gap-2">
                 <StatusBadge status={p.status} />
                 <div className="flex items-center gap-2">
-                  {p.status !== "CANCELADO" && <CancelarBotao agendamentoId={p.id} />}
+                  {p.status !== "CANCELADO" && <CancelarBotao agendamentoId={p.id} status={p.status} />}
                   <a
                     href={linkWhatsapp(p.clienteContato, mensagem)}
                     target="_blank"

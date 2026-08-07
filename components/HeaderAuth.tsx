@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Avatar from "@/components/Avatar";
+import SininhoNotificacoes from "@/components/SininhoNotificacoes";
 
 function IconMenu({ className }: { className?: string }) {
   return (
@@ -23,19 +24,6 @@ function IconMais({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" className={className}>
       <path
         d="M12 5v14M5 12h14"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function IconLista({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className}>
-      <path
-        d="M8 6h10M8 12h10M8 18h10M4 6h.01M4 12h.01M4 18h.01"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
@@ -94,12 +82,13 @@ export default function HeaderAuth() {
         <Link
           href="/meus-pedidos"
           title="Minhas reservas"
-          className="flex items-center gap-1 h-9 px-3 rounded-lg border border-neutral-200 text-neutral-700 text-sm font-medium"
+          className="flex items-center h-9 px-3 rounded-lg border border-neutral-200 text-neutral-700 text-sm font-medium"
         >
-          <IconLista className="w-4 h-4" />
           Minhas reservas
         </Link>
       )}
+
+      <SininhoNotificacoes />
 
       <div className="relative" ref={menuRef}>
         <button

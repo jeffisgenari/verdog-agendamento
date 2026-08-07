@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import GoogleIcon from "@/components/GoogleIcon";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 const ERRO_LABEL: Record<string, string> = {
   OAuthSignin: "Não foi possível iniciar o login com Google.",
@@ -58,9 +59,7 @@ function LoginForm() {
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 text-sm text-neutral-500">
-        <a href="/">← Voltar</a>
-      </header>
+      <BotaoVoltar />
 
       <div className="flex flex-col items-center pt-8 pb-2">
         <Image src="/logo.png" alt="Verdog" width={1068} height={481} className="h-10 w-auto" priority />
@@ -90,6 +89,10 @@ function LoginForm() {
             className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
           />
         </label>
+
+        <Link href="/esqueci-senha" className="text-xs text-verdog self-end -mt-1">
+          Esqueci minha senha
+        </Link>
 
         {erro && <p className="text-xs text-red-600">{erro}</p>}
 

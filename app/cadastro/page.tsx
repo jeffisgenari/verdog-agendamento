@@ -4,6 +4,8 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import BotaoVoltar from "@/components/BotaoVoltar";
+import { formatarCpf, cpfValido } from "@/lib/cpf";
 
 export default function Cadastro() {
   return (
@@ -22,6 +24,7 @@ function CadastroForm() {
     nome: "",
     email: "",
     telefone: "",
+    cpf: "",
     senha: "",
     endereco: "",
     numero: "",
@@ -38,6 +41,12 @@ function CadastroForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+
+    if (!cpfValido(form.cpf)) {
+      setErro("Informe um CPF válido.");
+      return;
+    }
+
     setCarregando(true);
 
     const res = await fetch("/api/usuario/registrar", {
@@ -94,9 +103,7 @@ function CadastroForm() {
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 text-sm text-neutral-500">
-        <a href="/login">← Voltar</a>
-      </header>
+      <BotaoVoltar />
 
       <div className="flex flex-col items-center pt-8 pb-2">
         <Image src="/logo.png" alt="Verdog" width={1068} height={481} className="h-10 w-auto" />
@@ -107,6 +114,17 @@ function CadastroForm() {
         {campo("Nome completo", "nome")}
         {campo("E-mail", "email", { type: "email" })}
         {campo("Telefone", "telefone", { type: "tel" })}
+        <label className="text-xs text-neutral-600">
+          CPF
+          <input
+            type="text"
+            value={form.cpf}
+            onChange={(e) => setForm((f) => ({ ...f, cpf: formatarCpf(e.target.value) }))}
+            inputMode="numeric"
+            maxLength={14}
+            className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
+          />
+        </label>
         {campo("Senha", "senha", { type: "password" })}
         {campo("Endereço", "endereco")}
         {campo("Número", "numero")}

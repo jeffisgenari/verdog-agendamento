@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import AvatarUpload from "./AvatarUpload";
 import AppHeader from "@/components/AppHeader";
 import BotaoVoltar from "@/components/BotaoVoltar";
+import { formatarCpf } from "@/lib/cpf";
+import ReenviarVerificacaoBotao from "@/components/ReenviarVerificacaoBotao";
 
 const TIPO_LABEL: Record<string, string> = {
   CLIENTE: "Cliente",
@@ -47,8 +49,19 @@ export default async function MinhaConta() {
 
       <div className="px-4">
         <Campo label="Nome" valor={usuario.name} />
-        <Campo label="E-mail" valor={usuario.email} />
+        <div className="py-3 border-b border-neutral-100">
+          <div className="text-xs text-neutral-400">E-mail</div>
+          <div className="text-sm mt-0.5">{usuario.email}</div>
+          <div className="mt-1.5">
+            {usuario.emailVerified ? (
+              <span className="text-[11px] text-verdog">✓ Verificado</span>
+            ) : (
+              <ReenviarVerificacaoBotao />
+            )}
+          </div>
+        </div>
         <Campo label="Telefone" valor={usuario.telefone} />
+        <Campo label="CPF" valor={usuario.cpf ? formatarCpf(usuario.cpf) : null} />
         <Campo
           label="Endereço"
           valor={

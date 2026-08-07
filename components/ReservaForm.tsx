@@ -13,7 +13,7 @@ type Props = {
   tipoServico: "PASSEIO" | "ADESTRAMENTO" | "HOSPEDAGEM";
   disponibilidades: Disponibilidade[];
   noitesDisponiveis: string[];
-  usuarioLogado: { nome: string | null; telefone: string | null } | null;
+  usuarioLogado: { nome: string | null; telefone: string | null; cpf: string | null } | null;
   loginUrl: string;
 };
 
@@ -44,7 +44,7 @@ export default function ReservaForm({
   } | null>(null);
   const [nome, setNome] = useState(usuarioLogado?.nome ?? "");
   const [contato, setContato] = useState(usuarioLogado?.telefone ?? "");
-  const [cpf, setCpf] = useState("");
+  const [cpf, setCpf] = useState(usuarioLogado?.cpf ? formatarCpf(usuarioLogado.cpf) : "");
   const [enviando, setEnviando] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [agendamentoId, setAgendamentoId] = useState<string | null>(null);
@@ -71,9 +71,14 @@ export default function ReservaForm({
 
   async function copiarCodigoPix() {
     if (!pix) return;
-    await navigator.clipboard.writeText(pix.qrCode);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+    try {
+      await navigator.clipboard.writeText(pix.qrCode);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      // Alguns navegadores recusam a Clipboard API fora de certos
+      // contextos — o código continua selecionável/copiável na mão.
+    }
   }
 
   async function confirmar() {
@@ -255,13 +260,18 @@ export default function ReservaForm({
           <p className="text-sm font-medium">Pague com Pix pra confirmar</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={pix.qrCodeUrl} alt="QR Code Pix" className="w-48 h-48" />
-          <button
-            type="button"
-            onClick={copiarCodigoPix}
-            className="w-full border border-neutral-200 rounded-lg px-3 py-2.5 text-[11px] text-neutral-600 break-all text-left"
-          >
-            {copiado ? "Código copiado!" : pix.qrCode}
-          </button>
+          <div className="w-full flex flex-col gap-1">
+            <button
+              type="button"
+              onClick={copiarCodigoPix}
+              className="w-full border border-neutral-200 rounded-lg px-3 py-2.5 text-[11px] text-neutral-600 break-all text-left"
+            >
+              {pix.qrCode}
+            </button>
+            <span className="text-[11px] text-verdog text-center">
+              {copiado ? "Código copiado!" : "Clique para copiar"}
+            </span>
+          </div>
           <p className="text-[11px] text-neutral-400 text-center">
             Abra o app do seu banco, escolha pagar com Pix e escaneie o QR
             Code ou cole o código copiado acima.
