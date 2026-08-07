@@ -27,7 +27,9 @@
       "Bash(node --env-file=.env \"C:\\\\Users\\\\Jefinho\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Jefinho-Desktop-verdog-agendamento\\\\f0b02e9b-bcf0-4210-ae0e-9a52ed8e8549\\\\scratchpad\\\\seed-fotos.js\")",
       "Bash(node -r dotenv/config seed-fotos.js dotenv_config_path=.env)",
       "Bash(node --env-file=.env seed-fotos.js)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git ls-tree *)",
+      "Bash(git remote *)"
     ]
   }
 }
