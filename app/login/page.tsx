@@ -7,6 +7,16 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import GoogleIcon from "@/components/GoogleIcon";
 
+const ERRO_LABEL: Record<string, string> = {
+  OAuthSignin: "Não foi possível iniciar o login com Google.",
+  OAuthCallback: "O Google recusou o login (erro na volta). Verifique as credenciais/URIs configuradas.",
+  OAuthCreateAccount: "Não foi possível criar sua conta a partir do Google.",
+  OAuthAccountNotLinked: "Esse e-mail já tem uma conta criada de outra forma. Entre com e-mail e senha.",
+  AccessDenied: "Acesso negado pelo Google — sua conta pode não estar liberada como testadora do app ainda.",
+  Configuration: "Erro de configuração do login. Avise o suporte.",
+  Default: "Não foi possível entrar com o Google. Tente novamente.",
+};
+
 export default function Login() {
   return (
     <Suspense>
@@ -19,10 +29,13 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const erroOAuth = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState("");
+  const [erro, setErro] = useState(
+    erroOAuth ? ERRO_LABEL[erroOAuth] ?? ERRO_LABEL.Default : ""
+  );
   const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
