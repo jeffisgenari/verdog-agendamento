@@ -85,7 +85,7 @@ function CadastroForm() {
   const campo = (
     label: string,
     campo: keyof typeof form,
-    opts: { type?: string; obrigatorio?: boolean } = {}
+    opts: { type?: string; obrigatorio?: boolean; autoComplete?: string } = {}
   ) => (
     <label className="text-xs text-neutral-600">
       {label}
@@ -94,6 +94,8 @@ function CadastroForm() {
       )}
       <input
         type={opts.type ?? "text"}
+        name={campo}
+        autoComplete={opts.autoComplete}
         value={form[campo]}
         onChange={set(campo)}
         className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
@@ -111,13 +113,14 @@ function CadastroForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 px-4 pt-6 pb-8">
-        {campo("Nome completo", "nome")}
-        {campo("E-mail", "email", { type: "email" })}
-        {campo("Telefone", "telefone", { type: "tel" })}
+        {campo("Nome completo", "nome", { autoComplete: "name" })}
+        {campo("E-mail", "email", { type: "email", autoComplete: "email" })}
+        {campo("Telefone", "telefone", { type: "tel", autoComplete: "tel" })}
         <label className="text-xs text-neutral-600">
           CPF
           <input
             type="text"
+            name="cpf"
             value={form.cpf}
             onChange={(e) => setForm((f) => ({ ...f, cpf: formatarCpf(e.target.value) }))}
             inputMode="numeric"
@@ -125,10 +128,10 @@ function CadastroForm() {
             className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
           />
         </label>
-        {campo("Senha", "senha", { type: "password" })}
-        {campo("Endereço", "endereco")}
-        {campo("Número", "numero")}
-        {campo("Complemento", "complemento", { obrigatorio: false })}
+        {campo("Senha", "senha", { type: "password", autoComplete: "new-password" })}
+        {campo("Endereço", "endereco", { autoComplete: "address-line1" })}
+        {campo("Número", "numero", { autoComplete: "address-line2" })}
+        {campo("Complemento", "complemento", { obrigatorio: false, autoComplete: "address-line3" })}
 
         {erro && <p className="text-xs text-red-600">{erro}</p>}
 

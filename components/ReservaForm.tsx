@@ -201,6 +201,8 @@ export default function ReservaForm({
 
       <input
         placeholder="Seu nome"
+        name="name"
+        autoComplete="name"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
         disabled={!!pix}
@@ -208,6 +210,8 @@ export default function ReservaForm({
       />
       <input
         placeholder="Telefone (WhatsApp)"
+        name="tel"
+        autoComplete="tel"
         value={contato}
         onChange={(e) => setContato(e.target.value)}
         disabled={!!pix}
@@ -215,6 +219,7 @@ export default function ReservaForm({
       />
       <input
         placeholder="CPF"
+        name="cpf"
         value={cpf}
         onChange={(e) => setCpf(formatarCpf(e.target.value))}
         disabled={!!pix}

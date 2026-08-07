@@ -21,11 +21,39 @@ export default async function MeusClientes() {
   });
   if (!profissional) redirect("/");
 
-  const pedidos = await prisma.agendamento.findMany({
-    where: { anuncio: { profissionalId: profissional.id } },
-    include: { anuncio: true, cliente: true },
-    orderBy: { criadoEm: "desc" },
-  });
+  const [todosPedidos, faturamento, aguardandoCount, proxima] = await Promise.all([
+    prisma.agendamento.findMany({
+      where: { anuncio: { profissionalId: profissional.id } },
+      include: { anuncio: true, cliente: true },
+    }),
+    prisma.pagamento.aggregate({
+      where: { status: "paid", agendamento: { anuncio: { profissionalId: profissional.id } } },
+      _sum: { valor: true },
+    }),
+    prisma.agendamento.count({
+      where: { status: "AGUARDANDO_PAGAMENTO", anuncio: { profissionalId: profissional.id } },
+    }),
+    prisma.agendamento.findFirst({
+      where: {
+        status: "CONFIRMADO",
+        anuncio: { profissionalId: profissional.id },
+        dataHoraInicio: { gte: new Date() },
+      },
+      orderBy: { dataHoraInicio: "asc" },
+      include: { anuncio: true },
+    }),
+  ]);
+
+  // Próximas primeiro (a mais perto de acontecer no topo), depois as que já
+  // passaram (a mais recente primeiro) — em vez de ordem de criação.
+  const agora = new Date();
+  const futuros = todosPedidos
+    .filter((p) => p.dataHoraInicio >= agora)
+    .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+  const passados = todosPedidos
+    .filter((p) => p.dataHoraInicio < agora)
+    .sort((a, b) => b.dataHoraInicio.getTime() - a.dataHoraInicio.getTime());
+  const pedidos = [...futuros, ...passados];
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
@@ -34,6 +62,34 @@ export default async function MeusClientes() {
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Meus clientes</h1>
+      </div>
+
+      <div className="px-4 pb-2 flex flex-col gap-2">
+        <div className="border border-verdog-pale bg-verdog-pale rounded-2xl p-4">
+          <div className="text-xs text-verdog-dark">Recebido confirmado</div>
+          <div className="text-2xl font-semibold text-verdog-dark mt-0.5">
+            R$ {(faturamento._sum.valor ?? 0).toFixed(2)}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="border border-neutral-100 rounded-2xl p-3">
+            <div className="text-xs text-neutral-500">Aguardando pagamento</div>
+            <div className="text-xl font-medium mt-0.5">{aguardandoCount}</div>
+          </div>
+          <div className="border border-neutral-100 rounded-2xl p-3">
+            <div className="text-xs text-neutral-500">Próxima reserva</div>
+            {proxima ? (
+              <div className="text-xs font-medium mt-1 leading-snug">
+                {proxima.anuncio.titulo}
+                <div className="text-verdog">
+                  {formatarPeriodo(proxima.anuncio.tipoServico, proxima.dataHoraInicio, proxima.dataHoraFim)}
+                </div>
+              </div>
+            ) : (
+              <div className="text-xl font-medium mt-0.5 text-neutral-300">—</div>
+            )}
+          </div>
+        </div>
       </div>
 
       <ul className="flex flex-col gap-3 px-4 pb-6">

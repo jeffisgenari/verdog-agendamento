@@ -10,16 +10,32 @@ import IconWhatsapp from "@/components/IconWhatsapp";
 import AppHeader from "@/components/AppHeader";
 import BotaoVoltar from "@/components/BotaoVoltar";
 import CancelarBotao from "@/components/CancelarBotao";
+import PagarPixBotao from "@/components/PagarPixBotao";
 
 export default async function MeusPedidos() {
   const session = await getServerSession(authOptions).catch(() => null);
   if (!session?.user) redirect("/login?callbackUrl=/meus-pedidos");
 
-  const pedidos = await prisma.agendamento.findMany({
+  const todosPedidos = await prisma.agendamento.findMany({
     where: { clienteId: session.user.id },
-    include: { anuncio: { include: { profissional: { include: { user: true } } } } },
-    orderBy: { criadoEm: "desc" },
+    include: {
+      anuncio: { include: { profissional: { include: { user: true } } } },
+      pagamento: true,
+    },
   });
+
+  // Próximas primeiro (a mais perto de acontecer no topo), depois as que já
+  // passaram (a mais recente primeiro) — em vez de ordem de criação, que
+  // deixava reserva urgente escondida atrás de uma criada depois pra mais
+  // longe no futuro.
+  const agora = new Date();
+  const futuros = todosPedidos
+    .filter((p) => p.dataHoraInicio >= agora)
+    .sort((a, b) => a.dataHoraInicio.getTime() - b.dataHoraInicio.getTime());
+  const passados = todosPedidos
+    .filter((p) => p.dataHoraInicio < agora)
+    .sort((a, b) => b.dataHoraInicio.getTime() - a.dataHoraInicio.getTime());
+  const pedidos = [...futuros, ...passados];
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
@@ -40,6 +56,8 @@ export default async function MeusPedidos() {
           const numeroProfissional = p.anuncio.profissional.telefone || p.anuncio.profissional.user?.telefone;
           const podeFalarNoWhatsapp = p.status === "CONFIRMADO" && numeroProfissional;
           const mensagem = `Olá ${p.anuncio.profissional.nome}! Sobre a minha reserva de "${p.anuncio.titulo}"...`;
+          const aguardandoPix = p.status === "AGUARDANDO_PAGAMENTO" && p.pagamento?.pixQrCode && p.pagamento?.pixQrCodeUrl;
+          const pixExpirado = !!(p.pagamento?.pixExpiraEm && p.pagamento.pixExpiraEm < new Date());
 
           return (
             <li
@@ -73,6 +91,15 @@ export default async function MeusPedidos() {
                   )}
                 </div>
               </div>
+
+              {aguardandoPix && (
+                <PagarPixBotao
+                  agendamentoId={p.id}
+                  qrCode={p.pagamento!.pixQrCode!}
+                  qrCodeUrl={p.pagamento!.pixQrCodeUrl!}
+                  expirado={pixExpirado}
+                />
+              )}
             </li>
           );
         })}

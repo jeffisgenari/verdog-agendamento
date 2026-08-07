@@ -1,91 +1,117 @@
 # Verdog Agendamento
 
-Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
+Marketplace de agendamento para serviços pet — passeio, adestramento e
+hospedagem — com pagamento via Pix integrado.
 
-## O que já está pronto
+🔗 **No ar:** [verdog-agendamento.vercel.app](https://verdog-agendamento.vercel.app)
 
-- **No ar**: github.com/jeffisgenari/verdog-agendamento → deploy automático
-  no Vercel (verdog-agendamento.vercel.app), banco Postgres real (Neon)
-- Login e cadastro de verdade: e-mail/senha e Google (com vínculo automático
-  se a pessoa já tinha conta por senha), mais conta de admin provisória
-- Cada conta escolhe se é cliente ou profissional logo no primeiro acesso
-- Home com filtros, cards padronizados (foto, local/zona, preço,
-  profissional) e selo "+ Reservar"
-- Cadastro de anúncio: fotos (até 8, comprimidas no navegador), local/zona,
-  local da hospedagem em texto livre, e disponibilidade — passeio/adestramento
-  em horários fixos, hospedagem em diárias soltas escolhidas num calendário
-  de verdade. Todos os campos são obrigatórios.
-- **Meus anúncios**: profissional edita (título, descrição, preço, fotos,
-  horários) sem precisar de aprovação de novo, e pausa/retoma a qualquer
-  momento — anúncio pausado some da home na hora
-- Reserva exige login, evita duplo agendamento do mesmo horário/diária e
-  fica vinculada à conta do cliente
-- Painel admin para aprovar/rejeitar anúncios (rota protegida, só admin)
-- "Minhas reservas" (cliente) e "Meus clientes" (profissional), com botão
-  de voltar, botão de WhatsApp — do profissional pro cliente sempre, e do
-  cliente pro profissional só depois que o pagamento é confirmado — e
-  botão de cancelar (dos dois lados), que libera o horário de volta pra
-  outra pessoa reservar
-- **Pagamento de verdade via Pix (Pagar.me)** — ao reservar, o cliente
-  informa o CPF (exigido pelo Pagar.me) e recebe um QR Code Pix pra pagar
-  na hora. A confirmação é automática: o Pagar.me avisa nosso site por
-  webhook (`app/api/webhook-pagarme/route.ts`, autenticado por usuário/senha
-  — ver `PAGARME_WEBHOOK_USER`/`PAGARME_WEBHOOK_PASSWORD` abaixo) assim que
-  o Pix cai, e a reserva muda pra "Confirmado" sozinha — sem precisar
-  atualizar a página. Se o pagamento falha ou expira, o horário é liberado
-  automaticamente. Testado de ponta a ponta com a conta de produção de
-  verdade do Pagar.me (essa conta não tem ambiente de testes separado).
-  Cartão de crédito ainda não existe.
-- Perfil público do profissional, avatar de usuário (upload ou vindo do
-  Google), cabeçalho padrão (logo clicável + menu) em toda página
-- Rodapé em toda página: logo, WhatsApp e Instagram, e link pra Política de
-  Privacidade (`app/politica-de-privacidade`)
-- **Recuperação de senha** ("Esqueci minha senha" no login) e **verificação
-  de e-mail** (link enviado no cadastro, com opção de reenviar em "Meus
-  dados") — e-mails enviados via Resend (`lib/email.ts`), domínio
-  `mail.verdog.com.br` verificado, entrega pra qualquer cliente de
-  verdade. Contas Google já entram verificadas automaticamente. Testado de
-  ponta a ponta.
-- **Sino de notificações** no cabeçalho (bolinha vermelha quando tem algo
-  novo) — hoje avisa cliente e profissional quando um pagamento é
-  confirmado. Estrutura pronta pra adicionar outros tipos depois
-  (`lib/notificacoes.ts`).
-- Zonas do anúncio são as reais do Rio de Janeiro (Norte/Sul/Oeste/Centro
-  — não existe "Zona Leste" aqui, isso é divisão de SP); bairro continua
-  sendo texto livre. Zona e bairro são obrigatórios.
-- Favicon configurado
+## O que é
 
-## O que falta (próximos passos)
+O Verdog Agendamento conecta tutores de pets a profissionais que oferecem
+passeio, adestramento ou hospedagem. Profissionais anunciam seus serviços
+com fotos, preço e horários disponíveis; clientes encontram, reservam e
+pagam tudo dentro do site — sem precisar trocar mensagem só pra saber se
+tem horário livre.
 
-1. **Colocar as variáveis do Pagar.me e do Resend no Vercel** — o código já
-   está pronto e testado localmente. Faltam, em Environment Variables
-   (ambiente Production), as variáveis que já estão no `.env.local` local:
-   `PAGARME_SECRET_KEY`, `PAGARME_WEBHOOK_USER`, `PAGARME_WEBHOOK_PASSWORD`
-   (webhook do Pagar.me já cadastrado, aponta pra
-   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`),
-   `RESEND_API_KEY` e `RESEND_FROM_EMAIL` (`Verdog <naoresponda@mail.verdog.com.br>`).
-2. **Cartão de crédito como forma de pagamento adicional** (opcional) —
-   hoje só tem Pix. Cartão exige um script do Pagar.me na página pra
-   tokenizar o cartão sem o número passar pelo nosso servidor.
-3. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
-   projeto.
-4. Itens menores (deliberadamente adiados): notificações automáticas fora
-   do app (hoje só o sino interno + WhatsApp manual) e avaliações de
-   profissionais — mais armazenamento de fotos num serviço de verdade
-   (hoje ficam comprimidas dentro do próprio banco — funciona, mas não
-   escala indefinidamente).
+## Funcionalidades
+
+### Para clientes
+
+- Busca de serviços por tipo (passeio, adestramento, hospedagem) e zona da
+  cidade
+- Reserva com escolha de horário exato (passeio/adestramento) ou período
+  de diárias num calendário (hospedagem) — sem risco de dois clientes
+  pegarem o mesmo horário
+- Pagamento via Pix na hora, com confirmação automática assim que o
+  pagamento cai — sem precisar atualizar a página
+- Se sair da tela antes de pagar, o botão "Pagar agora" em "Minhas
+  reservas" reabre o mesmo QR Code
+- Cancelamento de reservas ainda não pagas; reservas já pagas passam pelo
+  suporte via WhatsApp (por causa do estorno)
+- Cadastro com CPF (agiliza o pagamento Pix), verificação de e-mail e
+  recuperação de senha
+- Notificação no app quando um pagamento é confirmado
+- Contato direto com o profissional por WhatsApp após a reserva ser paga
+
+### Para profissionais
+
+- Criação de anúncios com fotos, descrição, preço e disponibilidade
+- Edição e pausa de anúncios a qualquer momento, sem precisar de nova
+  aprovação
+- Painel "Meus clientes" com resumo (faturamento confirmado, reservas
+  aguardando pagamento, próxima reserva) e lista de todas as reservas,
+  ordenada pela mais próxima de acontecer
+- Cancelamento de reservas não pagas
+- Notificação no app quando uma reserva é paga
+
+### Administração
+
+- Painel `/admin` (só a conta admin acessa): visão geral com faturamento e
+  contagens, aprovação/rejeição de anúncios, lista de todas as reservas e
+  de todos os usuários, cada um com filtros
+
+## Como funciona o pagamento
+
+Pagamento via Pix, processado pelo [Pagar.me](https://pagar.me). Ao
+confirmar uma reserva, o cliente recebe um QR Code Pix pra pagar na hora;
+assim que o pagamento é feito, um webhook autenticado avisa o site, que
+confirma a reserva automaticamente — sem intervenção manual. Se o
+pagamento falha ou expira sem ser feito, o horário é liberado de volta
+pra outra pessoa reservar. Cartão de crédito ainda não existe, só Pix.
+
+## Stack técnica
+
+- [Next.js](https://nextjs.org) (App Router) + React + TypeScript
+- [Prisma](https://www.prisma.io) + PostgreSQL ([Neon](https://neon.tech))
+- [NextAuth](https://next-auth.js.org) — login por e-mail/senha e Google
+- [Tailwind CSS](https://tailwindcss.com)
+- [Pagar.me](https://pagar.me) — pagamento via Pix
+- [Resend](https://resend.com) — e-mails transacionais (recuperação de
+  senha, verificação de cadastro)
+- Deploy automático via [Vercel](https://vercel.com)
+
+## Rodando localmente
+
+```bash
+npm install
+npx prisma migrate dev
+npm run dev
+```
+
+Precisa de um arquivo `.env` (com `DATABASE_URL`) e `.env.local` com as
+demais variáveis — veja a lista completa abaixo.
+
+### Variáveis de ambiente
+
+| Variável | Pra que serve |
+|---|---|
+| `DATABASE_URL` | Conexão com o Postgres (Neon) |
+| `NEXTAUTH_SECRET` / `NEXTAUTH_URL` | NextAuth (login) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Login com Google |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD_HASH` | Conta de admin provisória |
+| `PAGARME_SECRET_KEY` | Criar cobranças Pix |
+| `PAGARME_WEBHOOK_USER` / `PAGARME_WEBHOOK_PASSWORD` | Autenticar o webhook que confirma pagamento |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Enviar e-mails transacionais |
 
 ## Como colocar no ar (passo a passo, sem precisar saber programar)
 
-1. Crie uma conta gratuita em [neon.tech](https://neon.tech) ou
-   [supabase.com](https://supabase.com) — isso te dá o banco de dados.
-   Copie a "connection string" (uma URL que começa com `postgresql://`).
+1. Crie uma conta gratuita em [neon.tech](https://neon.tech) — isso te dá
+   o banco de dados. Copie a "connection string" (URL que começa com
+   `postgresql://`).
 2. Crie uma conta em [github.com](https://github.com) e suba esta pasta
    como um repositório novo.
 3. Crie uma conta em [vercel.com](https://vercel.com), conecte com o
-   GitHub e importe o repositório. Nas configurações do projeto, adicione
-   a variável de ambiente `DATABASE_URL` com o valor copiado no passo 1.
+   GitHub e importe o repositório. Adicione as variáveis de ambiente da
+   tabela acima nas configurações do projeto.
 4. O Vercel builda e publica automaticamente. Toda vez que o código for
    atualizado no GitHub, o site atualiza sozinho.
 
-Se preferir, posso te guiar em cada uma dessas contas quando chegar a hora.
+## Roadmap
+
+1. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
+   projeto, pra quem já visita a loja descobrir o agendamento.
+2. **Cartão de crédito** como forma de pagamento adicional (hoje só Pix).
+3. Notificações automáticas fora do app (hoje é só o sino interno +
+   WhatsApp manual) e avaliações de profissionais.
+4. Armazenamento de fotos num serviço de verdade — hoje ficam comprimidas
+   dentro do próprio banco, o que funciona mas não escala indefinidamente.

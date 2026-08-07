@@ -1,6 +1,9 @@
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import Footer from "@/components/Footer";
+
+const montserrat = Montserrat({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Verdog | Agendamento",
@@ -17,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="bg-white text-neutral-900">
+      <body className={`${montserrat.className} bg-white text-neutral-900`}>
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
         <Footer />
       </body>

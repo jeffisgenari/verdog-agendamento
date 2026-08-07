@@ -83,6 +83,8 @@ function RedefinirSenhaForm() {
             Nova senha
             <input
               type="password"
+              name="new-password"
+              autoComplete="new-password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               placeholder="••••••••"
@@ -93,6 +95,8 @@ function RedefinirSenhaForm() {
             Confirmar nova senha
             <input
               type="password"
+              name="confirm-new-password"
+              autoComplete="new-password"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
               placeholder="••••••••"
