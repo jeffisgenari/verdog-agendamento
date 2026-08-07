@@ -13,7 +13,6 @@ const TIPO_LABEL: Record<string, string> = {
 const ZONAS = [
   { valor: "NORTE", label: "Zona Norte" },
   { valor: "SUL", label: "Zona Sul" },
-  { valor: "LESTE", label: "Zona Leste" },
   { valor: "OESTE", label: "Zona Oeste" },
   { valor: "CENTRO", label: "Centro" },
 ] as const;

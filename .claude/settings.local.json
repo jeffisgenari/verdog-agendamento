@@ -45,7 +45,9 @@
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(24\\).toString\\('hex'\\)\\)\")",
       "Bash(curl -s -X POST http://localhost:3000/api/webhook-pagarme -H 'Content-Type: application/json' -H 'x-hub-signature: __CMDSUB_OUTPUT__' --data-binary '@C:\\\\Users\\\\Jefinho\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Jefinho-Desktop-verdog-agendamento\\\\f0b02e9b-bcf0-4210-ae0e-9a52ed8e8549\\\\scratchpad/webhook_payload.json')",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(12\\).toString\\('base64'\\).replace\\(/[^A-Za-z0-9]/g,''\\).slice\\(0,16\\) + '!Xk9'\\)\")",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(xargs grep -n \"zona\\\\|ZonaAnuncio\")",
+      "Bash(xargs -I{} basename {})"
     ]
   }
 }

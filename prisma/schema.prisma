@@ -28,10 +28,11 @@ enum StatusAgendamento {
   CANCELADO
 }
 
+// Zonas do Rio de Janeiro (não existe "Zona Leste" no Rio — isso é divisão
+// de São Paulo). O bairro em si é texto livre (campo `local` do Anuncio).
 enum ZonaAnuncio {
   NORTE
   SUL
-  LESTE
   OESTE
   CENTRO
 }

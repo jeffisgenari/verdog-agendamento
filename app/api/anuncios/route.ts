@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const TIPOS_SERVICO = ["PASSEIO", "ADESTRAMENTO", "HOSPEDAGEM"] as const;
-const ZONAS = ["NORTE", "SUL", "LESTE", "OESTE", "CENTRO"] as const;
+const ZONAS = ["NORTE", "SUL", "OESTE", "CENTRO"] as const;
 const MAX_FOTOS = 8;
 const MAX_NOITES_POR_JANELA = 366;
 

@@ -1,12 +1,16 @@
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AprovarBotoes from "@/components/AprovarBotoes";
 import AppHeader from "@/components/AppHeader";
 import BotaoVoltar from "@/components/BotaoVoltar";
 
-// TODO: proteger esta rota — só a conta admin pode acessar.
-// Sugestão: usar NextAuth com um papel "admin" no Profissional,
-// e um middleware que redireciona quem não tiver esse papel.
 export default async function PainelAdmin() {
+  const session = await getServerSession(authOptions).catch(() => null);
+  if (!session?.user) redirect("/login?callbackUrl=/admin");
+  if (session.user.tipo !== "ADMIN") redirect("/");
+
   // TODO(demo): sem DATABASE_URL configurado ainda, cai no catch e mostra lista vazia.
   const pendentes = await prisma.anuncio
     .findMany({

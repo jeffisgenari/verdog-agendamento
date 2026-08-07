@@ -42,8 +42,17 @@ Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
   Privacidade (`app/politica-de-privacidade`)
 - **Recuperação de senha** ("Esqueci minha senha" no login) e **verificação
   de e-mail** (link enviado no cadastro, com opção de reenviar em "Meus
-  dados") — e-mails enviados via Resend (`lib/email.ts`). Contas Google já
-  entram verificadas automaticamente. Testado de ponta a ponta.
+  dados") — e-mails enviados via Resend (`lib/email.ts`), domínio
+  `mail.verdog.com.br` verificado, entrega pra qualquer cliente de
+  verdade. Contas Google já entram verificadas automaticamente. Testado de
+  ponta a ponta.
+- **Sino de notificações** no cabeçalho (bolinha vermelha quando tem algo
+  novo) — hoje avisa cliente e profissional quando um pagamento é
+  confirmado. Estrutura pronta pra adicionar outros tipos depois
+  (`lib/notificacoes.ts`).
+- Zonas do anúncio são as reais do Rio de Janeiro (Norte/Sul/Oeste/Centro
+  — não existe "Zona Leste" aqui, isso é divisão de SP); bairro continua
+  sendo texto livre. Zona e bairro são obrigatórios.
 - Favicon configurado
 
 ## O que falta (próximos passos)
@@ -53,21 +62,18 @@ Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
    (ambiente Production), as variáveis que já estão no `.env.local` local:
    `PAGARME_SECRET_KEY`, `PAGARME_WEBHOOK_USER`, `PAGARME_WEBHOOK_PASSWORD`
    (webhook do Pagar.me já cadastrado, aponta pra
-   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`) e
-   `RESEND_API_KEY`.
-2. **Verificar um domínio no Resend** (resend.com/domains) — sem isso, os
-   e-mails de recuperação de senha/verificação só chegam pro e-mail da
-   própria conta Resend, não pros clientes de verdade. Depois de verificar,
-   define `RESEND_FROM_EMAIL` (ex: `"Verdog <contato@verdog.com.br>"`).
-3. **Cartão de crédito como forma de pagamento adicional** (opcional) —
+   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`),
+   `RESEND_API_KEY` e `RESEND_FROM_EMAIL` (`Verdog <naoresponda@mail.verdog.com.br>`).
+2. **Cartão de crédito como forma de pagamento adicional** (opcional) —
    hoje só tem Pix. Cartão exige um script do Pagar.me na página pra
    tokenizar o cartão sem o número passar pelo nosso servidor.
-4. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
+3. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
    projeto.
-5. Itens menores (deliberadamente adiados): notificações automáticas (hoje
-   é só WhatsApp manual) e avaliações de profissionais — mais
-   armazenamento de fotos num serviço de verdade (hoje ficam comprimidas
-   dentro do próprio banco — funciona, mas não escala indefinidamente).
+4. Itens menores (deliberadamente adiados): notificações automáticas fora
+   do app (hoje só o sino interno + WhatsApp manual) e avaliações de
+   profissionais — mais armazenamento de fotos num serviço de verdade
+   (hoje ficam comprimidas dentro do próprio banco — funciona, mas não
+   escala indefinidamente).
 
 ## Como colocar no ar (passo a passo, sem precisar saber programar)
 

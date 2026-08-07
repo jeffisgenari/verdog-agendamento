@@ -12,7 +12,6 @@ import BotaoVoltar from "@/components/BotaoVoltar";
 const ZONA_LABEL: Record<string, string> = {
   NORTE: "Zona Norte",
   SUL: "Zona Sul",
-  LESTE: "Zona Leste",
   OESTE: "Zona Oeste",
   CENTRO: "Centro",
 };
