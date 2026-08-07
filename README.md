@@ -21,24 +21,39 @@ Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
 - Reserva exige login, evita duplo agendamento do mesmo horário/diária e
   fica vinculada à conta do cliente
 - Painel admin para aprovar/rejeitar anúncios (rota protegida, só admin)
-- "Meus pedidos" (cliente) e "Meus clientes" (profissional), com botão de
-  WhatsApp — do profissional pro cliente sempre, e do cliente pro
-  profissional só depois que o pagamento é confirmado
+- "Minhas reservas" (cliente) e "Meus clientes" (profissional), com botão
+  de voltar, botão de WhatsApp — do profissional pro cliente sempre, e do
+  cliente pro profissional só depois que o pagamento é confirmado — e
+  botão de cancelar (dos dois lados), que libera o horário de volta pra
+  outra pessoa reservar
+- **Pagamento de verdade via Pix (Pagar.me)** — ao reservar, o cliente
+  informa o CPF (exigido pelo Pagar.me) e recebe um QR Code Pix pra pagar
+  na hora. A confirmação é automática: o Pagar.me avisa nosso site por
+  webhook (`app/api/webhook-pagarme/route.ts`, autenticado por usuário/senha
+  — ver `PAGARME_WEBHOOK_USER`/`PAGARME_WEBHOOK_PASSWORD` abaixo) assim que
+  o Pix cai, e a reserva muda pra "Confirmado" sozinha — sem precisar
+  atualizar a página. Se o pagamento falha ou expira, o horário é liberado
+  automaticamente. Testado de ponta a ponta com a conta de produção de
+  verdade do Pagar.me (essa conta não tem ambiente de testes separado).
+  Cartão de crédito ainda não existe.
 - Perfil público do profissional, avatar de usuário (upload ou vindo do
   Google), cabeçalho padrão (logo clicável + menu) em toda página
 - Favicon configurado
 
 ## O que falta (próximos passos)
 
-1. **Pagamento de verdade (Pagar.me)** — a peça que falta pra fechar o
-   ciclo. Hoje a reserva fica "aguardando pagamento" pra sempre. Falta a
-   chamada de cobrança e o webhook que confirma o pagamento
-   (`app/api/bookings/route.ts` e `app/api/webhook-pagarme/route.ts` já têm
-   os pontos marcados com `TODO`). Já temos domínio público, então esse é
-   o único bloqueio real agora.
-2. **Cancelar agendamento** — hoje não existe essa opção nem pro cliente
-   nem pro profissional; e ao cancelar, teria que liberar o horário de
-   volta pra outra pessoa reservar.
+1. **Colocar as variáveis do Pagar.me no Vercel** — o código já está pronto,
+   testado e o webhook já está cadastrado no painel do Pagar.me (evento
+   `charge.paid` e `charge.payment_failed`, apontando pra
+   `https://verdog-agendamento.vercel.app/api/webhook-pagarme`). Só falta
+   levar pro Vercel (Configurações do projeto → Environment Variables,
+   ambiente Production) as 3 variáveis que já estão no `.env.local` local:
+   `PAGARME_SECRET_KEY`, `PAGARME_WEBHOOK_USER` e `PAGARME_WEBHOOK_PASSWORD`
+   (usuário/senha — não é assinatura, é Basic Auth mesmo, configurado na
+   criação do webhook em Webhooks → editar → Habilitar autenticação).
+2. **Cartão de crédito como forma de pagamento adicional** (opcional) —
+   hoje só tem Pix. Cartão exige um script do Pagar.me na página pra
+   tokenizar o cartão sem o número passar pelo nosso servidor.
 3. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
    projeto.
 4. Itens menores: recuperação de senha, verificação de e-mail,

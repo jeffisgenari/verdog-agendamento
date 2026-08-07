@@ -202,6 +202,10 @@ model Agendamento {
   cliente         User?           @relation(fields: [clienteId], references: [id])
   clienteNome     String
   clienteContato  String
+  // CPF (só números) — exigido pelo Pagar.me pra gerar cobrança Pix.
+  // Nullable só pra não quebrar agendamentos de teste antigos, feitos
+  // antes do pagamento de verdade existir.
+  clienteCpf      String?
 
   // Passeio / Adestramento: usa dataHoraInicio + dataHoraFim (horário pontual)
   // Hospedagem: usa dataHoraInicio (check-in) + dataHoraFim (check-out)
@@ -221,8 +225,14 @@ model Pagamento {
   id              String       @id @default(cuid())
   agendamentoId   String       @unique
   agendamento     Agendamento  @relation(fields: [agendamentoId], references: [id])
+  // id do pedido (order) no Pagar.me — é o valor que volta no metadata do webhook.
   idTransacaoPagarme String
   valor           Float
   status          String
+  // Pix: guardamos o QR Code aqui pra poder reexibir se o cliente atualizar
+  // a página antes de pagar, sem precisar chamar o Pagar.me de novo.
+  pixQrCode       String?      @db.Text
+  pixQrCodeUrl    String?      @db.Text
+  pixExpiraEm     DateTime?
   criadoEm        DateTime     @default(now())
 }

@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { cancelarAgendamento } from "@/lib/agendamentos";
 
-// PATCH /api/agendamentos/:id/cancelar — o cliente que reservou ou o
-// profissional dono do anúncio podem cancelar. Libera de volta o(s)
-// horário(s)/diária(s) consumidos, pra outra pessoa poder reservar.
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET /api/agendamentos/:id/status — usado pela tela de pagamento Pix pra
+// saber quando o webhook do Pagar.me confirmou (ou recusou) o pagamento.
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
@@ -30,11 +25,5 @@ export async function PATCH(
     return NextResponse.json({ error: "Não autorizado." }, { status: 403 });
   }
 
-  if (agendamento.status === "CANCELADO") {
-    return NextResponse.json({ error: "Esse agendamento já está cancelado." }, { status: 400 });
-  }
-
-  await cancelarAgendamento(agendamento);
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ status: agendamento.status });
 }

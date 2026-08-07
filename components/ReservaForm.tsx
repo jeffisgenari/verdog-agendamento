@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import CalendarioHospedagem from "@/components/CalendarioHospedagem";
+import { formatarCpf, cpfValido } from "@/lib/cpf";
 
 type Disponibilidade = { id: string; inicio: string; fim: string };
 
@@ -43,11 +44,37 @@ export default function ReservaForm({
   } | null>(null);
   const [nome, setNome] = useState(usuarioLogado?.nome ?? "");
   const [contato, setContato] = useState(usuarioLogado?.telefone ?? "");
+  const [cpf, setCpf] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
-  const [confirmado, setConfirmado] = useState(false);
+  const [agendamentoId, setAgendamentoId] = useState<string | null>(null);
+  const [pix, setPix] = useState<{ qrCode: string; qrCodeUrl: string; expiraEm: string } | null>(null);
+  const [statusAgendamento, setStatusAgendamento] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
   const total = ehHospedagem ? (selecaoHospedagem?.noites ?? 0) * preco : preco;
+
+  useEffect(() => {
+    if (!agendamentoId || !pix || statusAgendamento) return;
+
+    const intervalo = setInterval(async () => {
+      const res = await fetch(`/api/agendamentos/${agendamentoId}/status`);
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json.status && json.status !== "AGUARDANDO_PAGAMENTO") {
+        setStatusAgendamento(json.status);
+      }
+    }, 4000);
+
+    return () => clearInterval(intervalo);
+  }, [agendamentoId, pix, statusAgendamento]);
+
+  async function copiarCodigoPix() {
+    if (!pix) return;
+    await navigator.clipboard.writeText(pix.qrCode);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  }
 
   async function confirmar() {
     setMensagem(null);
@@ -64,6 +91,10 @@ export default function ReservaForm({
       setMensagem("Preencha seu nome e contato.");
       return;
     }
+    if (!cpfValido(cpf)) {
+      setMensagem("Informe um CPF válido — é exigido pra gerar a cobrança Pix.");
+      return;
+    }
 
     setEnviando(true);
     const res = await fetch("/api/bookings", {
@@ -77,12 +108,14 @@ export default function ReservaForm({
               checkout: selecaoHospedagem!.checkout,
               clienteNome: nome,
               clienteContato: contato,
+              clienteCpf: cpf,
             }
           : {
               anuncioId,
               disponibilidadeId,
               clienteNome: nome,
               clienteContato: contato,
+              clienteCpf: cpf,
             }
       ),
     });
@@ -94,10 +127,8 @@ export default function ReservaForm({
       return;
     }
 
-    // TODO: redirecionar para a tela/checkout do Pagar.me usando o
-    // agendamentoId retornado (json.agendamentoId)
-    setConfirmado(true);
-    setMensagem("Agendamento criado! Redirecionando para o pagamento...");
+    setAgendamentoId(json.agendamentoId);
+    setPix(json.pix);
   }
 
   if (!usuarioLogado) {
@@ -151,7 +182,7 @@ export default function ReservaForm({
           <select
             value={disponibilidadeId}
             onChange={(e) => setDisponibilidadeId(e.target.value)}
-            disabled={confirmado}
+            disabled={!!pix}
             className="w-full mt-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm"
           >
             {disponibilidades.map((d) => (
@@ -167,34 +198,95 @@ export default function ReservaForm({
         placeholder="Seu nome"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
-        disabled={confirmado}
+        disabled={!!pix}
         className="border border-neutral-200 rounded-lg px-3 py-2 text-sm"
       />
       <input
         placeholder="Telefone (WhatsApp)"
         value={contato}
         onChange={(e) => setContato(e.target.value)}
-        disabled={confirmado}
+        disabled={!!pix}
+        className="border border-neutral-200 rounded-lg px-3 py-2 text-sm"
+      />
+      <input
+        placeholder="CPF"
+        value={cpf}
+        onChange={(e) => setCpf(formatarCpf(e.target.value))}
+        disabled={!!pix}
+        inputMode="numeric"
+        maxLength={14}
         className="border border-neutral-200 rounded-lg px-3 py-2 text-sm"
       />
 
       {mensagem && <p className="text-xs text-neutral-600">{mensagem}</p>}
 
-      <div className="flex items-center justify-between pt-2">
-        <div>
-          <div className="text-[11px] text-neutral-500">
-            Total{ehHospedagem && selecaoHospedagem ? ` (${selecaoHospedagem.noites} diária${selecaoHospedagem.noites > 1 ? "s" : ""})` : ""}
+      {pix && statusAgendamento === "CONFIRMADO" && (
+        <div className="flex flex-col items-center text-center gap-2 py-4">
+          <div className="w-12 h-12 rounded-full bg-verdog-pale text-verdog flex items-center justify-center text-2xl">
+            ✓
           </div>
-          <div className="text-base font-medium">R$ {total.toFixed(0)}</div>
+          <p className="text-sm font-medium">Pagamento confirmado!</p>
+          <p className="text-xs text-neutral-500">Sua reserva está confirmada.</p>
         </div>
-        <button
-          onClick={confirmar}
-          disabled={enviando || confirmado}
-          className="bg-verdog text-white text-sm font-medium rounded-lg px-5 py-2.5 disabled:opacity-60"
-        >
-          {enviando ? "Enviando..." : "Confirmar e pagar"}
-        </button>
-      </div>
+      )}
+
+      {pix && statusAgendamento === "CANCELADO" && (
+        <div className="flex flex-col items-center text-center gap-3 py-4">
+          <p className="text-sm text-neutral-600">
+            Não recebemos o pagamento a tempo e o horário foi liberado.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setPix(null);
+              setAgendamentoId(null);
+              setStatusAgendamento(null);
+              setMensagem(null);
+            }}
+            className="bg-verdog text-white text-sm font-medium rounded-lg px-5 py-2.5"
+          >
+            Tentar de novo
+          </button>
+        </div>
+      )}
+
+      {pix && !statusAgendamento && (
+        <div className="flex flex-col items-center gap-3 py-2">
+          <p className="text-sm font-medium">Pague com Pix pra confirmar</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={pix.qrCodeUrl} alt="QR Code Pix" className="w-48 h-48" />
+          <button
+            type="button"
+            onClick={copiarCodigoPix}
+            className="w-full border border-neutral-200 rounded-lg px-3 py-2.5 text-[11px] text-neutral-600 break-all text-left"
+          >
+            {copiado ? "Código copiado!" : pix.qrCode}
+          </button>
+          <p className="text-[11px] text-neutral-400 text-center">
+            Abra o app do seu banco, escolha pagar com Pix e escaneie o QR
+            Code ou cole o código copiado acima.
+          </p>
+          <p className="text-xs text-neutral-500">Aguardando confirmação do pagamento...</p>
+        </div>
+      )}
+
+      {!pix && (
+        <div className="flex items-center justify-between pt-2">
+          <div>
+            <div className="text-[11px] text-neutral-500">
+              Total{ehHospedagem && selecaoHospedagem ? ` (${selecaoHospedagem.noites} diária${selecaoHospedagem.noites > 1 ? "s" : ""})` : ""}
+            </div>
+            <div className="text-base font-medium">R$ {total.toFixed(0)}</div>
+          </div>
+          <button
+            onClick={confirmar}
+            disabled={enviando}
+            className="bg-verdog text-white text-sm font-medium rounded-lg px-5 py-2.5 disabled:opacity-60"
+          >
+            {enviando ? "Enviando..." : "Confirmar e pagar"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

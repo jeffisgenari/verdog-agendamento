@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cpfValido } from "@/lib/cpf";
+import { criarCobrancaPix } from "@/lib/pagarme";
+import { cancelarAgendamento } from "@/lib/agendamentos";
 
 // POST /api/bookings — exige login (ver app/anuncio/[id]/page.tsx).
-// Passeio/adestramento: { anuncioId, disponibilidadeId, clienteNome, clienteContato }
-// Hospedagem: { anuncioId, checkin, checkout, clienteNome, clienteContato }
+// Passeio/adestramento: { anuncioId, disponibilidadeId, clienteNome, clienteContato, clienteCpf }
+// Hospedagem: { anuncioId, checkin, checkout, clienteNome, clienteContato, clienteCpf }
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
@@ -14,10 +17,18 @@ export async function POST(req: NextRequest) {
   const clienteId = session.user.id;
 
   const body = await req.json();
-  const { anuncioId, disponibilidadeId, checkin, checkout, clienteNome, clienteContato } = body;
+  const { anuncioId, disponibilidadeId, checkin, checkout, clienteNome, clienteContato, clienteCpf } = body;
 
-  if (!anuncioId || !clienteNome || !clienteContato) {
+  if (!anuncioId || !clienteNome || !clienteContato || !clienteCpf) {
     return NextResponse.json({ erro: "Dados incompletos." }, { status: 400 });
+  }
+  if (!cpfValido(clienteCpf)) {
+    return NextResponse.json({ erro: "CPF inválido." }, { status: 400 });
+  }
+
+  const anuncio = await prisma.anuncio.findUnique({ where: { id: anuncioId } });
+  if (!anuncio) {
+    return NextResponse.json({ erro: "Anúncio não encontrado." }, { status: 404 });
   }
 
   const ehHospedagem = !!checkin && !!checkout;
@@ -66,6 +77,7 @@ export async function POST(req: NextRequest) {
             clienteId,
             clienteNome,
             clienteContato,
+            clienteCpf,
             dataHoraInicio: inicio,
             dataHoraFim: fim,
             status: "AGUARDANDO_PAGAMENTO",
@@ -92,6 +104,7 @@ export async function POST(req: NextRequest) {
           clienteId,
           clienteNome,
           clienteContato,
+          clienteCpf,
           dataHoraInicio: disponibilidade.inicio,
           dataHoraFim: disponibilidade.fim,
           status: "AGUARDANDO_PAGAMENTO",
@@ -110,8 +123,52 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // TODO: chamar a API do Pagar.me aqui para gerar a cobrança
-  // e retornar a URL/token de pagamento para o front-end.
+  const noites = ehHospedagem
+    ? Math.round(
+        (agendamento.dataHoraFim.getTime() - agendamento.dataHoraInicio.getTime()) /
+          (24 * 60 * 60 * 1000)
+      )
+    : 1;
+  const valorCentavos = Math.round(anuncio.preco * noites * 100);
 
-  return NextResponse.json({ agendamentoId: agendamento.id });
+  try {
+    const cobranca = await criarCobrancaPix({
+      agendamentoId: agendamento.id,
+      valorCentavos,
+      descricao: anuncio.titulo,
+      clienteNome,
+      clienteCpf,
+      clienteTelefone: clienteContato,
+      clienteEmail: session.user.email ?? "",
+    });
+
+    await prisma.pagamento.create({
+      data: {
+        agendamentoId: agendamento.id,
+        idTransacaoPagarme: cobranca.chargeId,
+        valor: valorCentavos / 100,
+        status: "waiting_payment",
+        pixQrCode: cobranca.qrCode,
+        pixQrCodeUrl: cobranca.qrCodeUrl,
+        pixExpiraEm: cobranca.expiraEm,
+      },
+    });
+
+    return NextResponse.json({
+      agendamentoId: agendamento.id,
+      pix: {
+        qrCode: cobranca.qrCode,
+        qrCodeUrl: cobranca.qrCodeUrl,
+        expiraEm: cobranca.expiraEm,
+      },
+    });
+  } catch (e) {
+    // Não conseguimos gerar a cobrança — desfaz o agendamento e libera o
+    // horário de volta, pra não deixar um horário "preso" sem cobrança.
+    await cancelarAgendamento(agendamento);
+    return NextResponse.json(
+      { erro: "Não foi possível gerar a cobrança Pix. Tente novamente em instantes." },
+      { status: 502 }
+    );
+  }
 }

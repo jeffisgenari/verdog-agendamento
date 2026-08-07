@@ -20,11 +20,11 @@ export default function BotaoVoltar() {
   const router = useRouter();
 
   return (
-    <div className="px-4 pt-3">
+    <div className="px-4 py-3">
       <button
         type="button"
         onClick={() => router.back()}
-        className="flex items-center gap-1 text-sm text-neutral-500"
+        className="flex items-center gap-1 h-9 px-3 rounded-lg border border-neutral-200 text-neutral-700 text-sm font-medium"
       >
         <IconSeta className="w-4 h-4" />
         Voltar
