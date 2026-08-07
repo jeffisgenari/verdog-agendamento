@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AvatarUpload from "./AvatarUpload";
 import AppHeader from "@/components/AppHeader";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 const TIPO_LABEL: Record<string, string> = {
   CLIENTE: "Cliente",
@@ -34,6 +35,7 @@ export default async function MinhaConta() {
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
+      <BotaoVoltar />
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Meus dados</h1>

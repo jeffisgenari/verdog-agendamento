@@ -36,7 +36,10 @@
       "Bash(git config *)",
       "Bash(git-credential-manager github *)",
       "Bash(git credential *)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"prisma studio\")",
+      "Bash(pkill -f \"5556\")"
     ]
   }
 }

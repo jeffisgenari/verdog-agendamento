@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import AppHeader from "@/components/AppHeader";
+import BotaoVoltar from "@/components/BotaoVoltar";
 import EditarAnuncioForm from "./EditarAnuncioForm";
 
 export default async function EditarAnuncio({
@@ -29,6 +30,7 @@ export default async function EditarAnuncio({
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
+      <BotaoVoltar />
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Editar anúncio</h1>

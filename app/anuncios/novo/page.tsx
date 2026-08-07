@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import NovoAnuncioForm from "./NovoAnuncioForm";
 import AppHeader from "@/components/AppHeader";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 export default async function NovoAnuncio() {
   const session = await getServerSession(authOptions).catch(() => null);
@@ -13,6 +14,7 @@ export default async function NovoAnuncio() {
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
+      <BotaoVoltar />
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Novo anúncio</h1>

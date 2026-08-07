@@ -4,45 +4,48 @@ Sistema de agendamento para passeadores, adestradores e hospedagem de pets.
 
 ## O que já está pronto
 
-- Login e cadastro de verdade: e-mail/senha e Google (NextAuth), com conta
-  de admin provisória separada
+- **No ar**: github.com/jeffisgenari/verdog-agendamento → deploy automático
+  no Vercel (verdog-agendamento.vercel.app), banco Postgres real (Neon)
+- Login e cadastro de verdade: e-mail/senha e Google (com vínculo automático
+  se a pessoa já tinha conta por senha), mais conta de admin provisória
 - Cada conta escolhe se é cliente ou profissional logo no primeiro acesso
 - Home com filtros, cards padronizados (foto, local/zona, preço,
   profissional) e selo "+ Reservar"
 - Cadastro de anúncio: fotos (até 8, comprimidas no navegador), local/zona,
-  e disponibilidade — passeio/adestramento em horários fixos, hospedagem
-  em diárias soltas escolhidas num calendário de verdade
+  local da hospedagem em texto livre, e disponibilidade — passeio/adestramento
+  em horários fixos, hospedagem em diárias soltas escolhidas num calendário
+  de verdade. Todos os campos são obrigatórios.
+- **Meus anúncios**: profissional edita (título, descrição, preço, fotos,
+  horários) sem precisar de aprovação de novo, e pausa/retoma a qualquer
+  momento — anúncio pausado some da home na hora
 - Reserva exige login, evita duplo agendamento do mesmo horário/diária e
   fica vinculada à conta do cliente
-- Painel admin para aprovar/rejeitar anúncios
+- Painel admin para aprovar/rejeitar anúncios (rota protegida, só admin)
 - "Meus pedidos" (cliente) e "Meus clientes" (profissional), com botão de
   WhatsApp — do profissional pro cliente sempre, e do cliente pro
   profissional só depois que o pagamento é confirmado
 - Perfil público do profissional, avatar de usuário (upload ou vindo do
-  Google)
-- Banco de dados real (Postgres/Neon) conectado
+  Google), cabeçalho padrão (logo clicável + menu) em toda página
+- Favicon configurado
 
 ## O que falta (próximos passos)
 
-1. **Pagamento de verdade (Pagar.me)** — hoje a reserva fica "aguardando
-   pagamento" pra sempre. Falta a chamada de cobrança e o webhook que
-   confirma o pagamento (`app/api/bookings/route.ts` e
-   `app/api/webhook-pagarme/route.ts` já têm os pontos marcados com `TODO`).
-   Precisa de domínio público pro Pagar.me conseguir chamar o webhook, então
-   depende do item 2.
-2. **Colocar no ar (deploy)** — GitHub + Vercel, ver seção abaixo. Sem isso
-   o site só existe no seu computador.
-3. **Credenciais reais do Google** — pra ativar o botão "Login com Google"
-   (Client ID/Secret no Google Cloud Console).
-4. **Editar/excluir anúncio** — hoje só dá pra criar; não dá pra mudar
-   fotos, preço ou adicionar mais horários depois de publicado.
-5. **Cancelar agendamento** — e liberar o horário de volta pra outra
-   pessoa reservar.
-6. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
-   projeto depois que ele estiver no ar.
-7. Itens menores: recuperação de senha, verificação de e-mail,
+1. **Pagamento de verdade (Pagar.me)** — a peça que falta pra fechar o
+   ciclo. Hoje a reserva fica "aguardando pagamento" pra sempre. Falta a
+   chamada de cobrança e o webhook que confirma o pagamento
+   (`app/api/bookings/route.ts` e `app/api/webhook-pagarme/route.ts` já têm
+   os pontos marcados com `TODO`). Já temos domínio público, então esse é
+   o único bloqueio real agora.
+2. **Cancelar agendamento** — hoje não existe essa opção nem pro cliente
+   nem pro profissional; e ao cancelar, teria que liberar o horário de
+   volta pra outra pessoa reservar.
+3. **Shopify App Proxy** — conectar `verdog.com.br/agendamento` a este
+   projeto.
+4. Itens menores: recuperação de senha, verificação de e-mail,
    notificações automáticas (hoje é só WhatsApp manual), avaliações de
-   profissionais.
+   profissionais, armazenamento de fotos num serviço de verdade (hoje
+   ficam comprimidas dentro do próprio banco — funciona, mas não escala
+   indefinidamente).
 
 ## Como colocar no ar (passo a passo, sem precisar saber programar)
 

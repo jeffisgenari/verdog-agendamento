@@ -31,6 +31,19 @@ function IconMais({ className }: { className?: string }) {
   );
 }
 
+function IconLista({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M8 6h10M8 12h10M8 18h10M4 6h.01M4 12h.01M4 18h.01"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function HeaderAuth() {
   const { data: session, status } = useSession();
   const [aberto, setAberto] = useState(false);
@@ -62,6 +75,7 @@ export default function HeaderAuth() {
   }
 
   const ehProfissional = session.user.tipo === "PROFISSIONAL";
+  const ehCliente = session.user.tipo === "CLIENTE";
 
   return (
     <div className="flex items-center gap-2">
@@ -73,6 +87,17 @@ export default function HeaderAuth() {
         >
           <IconMais className="w-4 h-4" />
           Anunciar
+        </Link>
+      )}
+
+      {ehCliente && (
+        <Link
+          href="/meus-pedidos"
+          title="Minhas reservas"
+          className="flex items-center gap-1 h-9 px-3 rounded-lg border border-neutral-200 text-neutral-700 text-sm font-medium"
+        >
+          <IconLista className="w-4 h-4" />
+          Minhas reservas
         </Link>
       )}
 
@@ -124,13 +149,13 @@ export default function HeaderAuth() {
               </>
             )}
 
-            {session.user.tipo === "CLIENTE" && (
+            {ehCliente && (
               <Link
                 href="/meus-pedidos"
                 onClick={() => setAberto(false)}
                 className="block px-4 py-2.5 text-sm hover:bg-verdog-pale"
               >
-                Meus pedidos
+                Minhas reservas
               </Link>
             )}
 

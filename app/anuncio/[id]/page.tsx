@@ -7,6 +7,7 @@ import ReservaForm from "@/components/ReservaForm";
 import Avatar from "@/components/Avatar";
 import GaleriaFotos from "@/components/GaleriaFotos";
 import AppHeader from "@/components/AppHeader";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 const ZONA_LABEL: Record<string, string> = {
   NORTE: "Zona Norte",
@@ -45,6 +46,7 @@ export default async function PaginaAnuncio({
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
+      <BotaoVoltar />
 
       <GaleriaFotos fotos={anuncio.fotos} titulo={anuncio.titulo} />
 

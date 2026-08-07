@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import AnuncioCard from "@/components/AnuncioCard";
 import AppHeader from "@/components/AppHeader";
+import BotaoVoltar from "@/components/BotaoVoltar";
 
 export default async function PerfilProfissional({
   params,
@@ -26,6 +27,7 @@ export default async function PerfilProfissional({
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
+      <BotaoVoltar />
 
       <div className="flex flex-col items-center gap-2 px-4 pt-8 pb-4">
         <Avatar
