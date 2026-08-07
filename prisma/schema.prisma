@@ -1,0 +1,229 @@
+// Schema do banco de dados do Verdog Agendamento
+// Documentação: https://www.prisma.io/docs
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoServico {
+  PASSEIO
+  ADESTRAMENTO
+  HOSPEDAGEM
+}
+
+enum StatusAnuncio {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+enum StatusAgendamento {
+  AGUARDANDO_PAGAMENTO
+  CONFIRMADO
+  CANCELADO
+}
+
+enum LocalHospedagem {
+  CASA_PROFISSIONAL
+  CASA_DONO
+}
+
+enum ZonaAnuncio {
+  NORTE
+  SUL
+  LESTE
+  OESTE
+  CENTRO
+}
+
+// Tipo de acesso de uma conta. Toda conta criada via Google começa como
+// PENDENTE — a pessoa escolhe "cliente" ou "profissional" logo depois de
+// entrar pela primeira vez (ver app/completar-cadastro).
+enum TipoUsuario {
+  PENDENTE
+  CLIENTE
+  PROFISSIONAL
+  ADMIN
+}
+
+// Conta de login (Google ou e-mail/senha). É o "guarda-chuva" tanto de
+// clientes quanto de profissionais — o campo `tipo` decide o que a pessoa
+// pode fazer.
+// Nome do model e os campos `name`/`image`/`emailVerified` são em inglês de
+// propósito: são exatamente os nomes que o adapter do NextAuth espera
+// encontrar no Prisma Client pra funcionar com login Google.
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  // Preenchidos no cadastro por e-mail/senha (ver app/cadastro). Quem entra
+  // só com Google não tem esses campos até completar o cadastro.
+  telefone      String?
+  endereco      String?
+  numero        String?
+  complemento   String?
+  // Só existe pra quem se cadastrou com e-mail/senha (não pra login Google).
+  senhaHash     String?
+  tipo          TipoUsuario  @default(PENDENTE)
+  criadoEm      DateTime     @default(now())
+  profissional  Profissional?
+  accounts      Account[]
+  sessions      Session[]
+  agendamentos  Agendamento[]
+
+  @@map("usuarios")
+}
+
+// Tabelas padrão exigidas pelo NextAuth para guardar o login OAuth (Google).
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+  @@map("contas_oauth")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+
+  @@map("sessoes")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("tokens_verificacao")
+}
+
+// Profissional que anuncia (passeador, adestrador ou hospedagem).
+// Criado automaticamente quando uma conta (User) escolhe o tipo PROFISSIONAL.
+model Profissional {
+  id          String    @id @default(cuid())
+  userId      String?   @unique
+  user        User?     @relation(fields: [userId], references: [id])
+  nome        String
+  email       String    @unique
+  telefone    String?
+  // Opcional: só existe pra quem ainda usa o login antigo por senha.
+  // Contas criadas via Google não têm senha.
+  senhaHash   String?
+  criadoEm    DateTime  @default(now())
+  anuncios    Anuncio[]
+}
+
+// Cada anúncio criado por um profissional
+model Anuncio {
+  id              String          @id @default(cuid())
+  profissionalId  String
+  profissional    Profissional    @relation(fields: [profissionalId], references: [id])
+  tipoServico     TipoServico
+  titulo          String
+  descricao       String
+  preco           Float
+  // Bairro/cidade (texto livre) e zona da cidade — usado nos cards da home
+  // e na página do anúncio.
+  local           String
+  zona            ZonaAnuncio
+  // Só usado quando tipoServico = HOSPEDAGEM
+  localHospedagem LocalHospedagem?
+  status          StatusAnuncio   @default(PENDENTE)
+  fotos           Foto[]
+  disponibilidades Disponibilidade[]
+  agendamentos    Agendamento[]
+  criadoEm        DateTime        @default(now())
+}
+
+// Um horário/diária que o profissional marcou como disponível pra esse
+// anúncio.
+// Passeio/adestramento: inicio+fim é o horário pontual do atendimento —
+// cada linha é uma opção fechada que o cliente escolhe pronta.
+// Hospedagem: cada linha é UMA diária/noite solta (inicio = dia, fim = dia
+// seguinte). O profissional cadastra um intervalo (ex: 15/08 a 30/08) que
+// vira várias linhas, uma por noite — o cliente escolhe check-in/check-out
+// livremente num calendário, e a reserva consome todas as noites do
+// intervalo escolhido.
+// Em ambos os casos, quando reservada `reservada` vira true e some da
+// lista de opções — é assim que evitamos que duas pessoas peguem o mesmo
+// horário/noite.
+model Disponibilidade {
+  id         String   @id @default(cuid())
+  anuncioId  String
+  anuncio    Anuncio  @relation(fields: [anuncioId], references: [id])
+  inicio     DateTime
+  fim        DateTime
+  reservada  Boolean  @default(false)
+  criadoEm   DateTime @default(now())
+
+  @@index([anuncioId, inicio])
+}
+
+// Até 8 fotos por anúncio
+model Foto {
+  id        String   @id @default(cuid())
+  anuncioId String
+  anuncio   Anuncio  @relation(fields: [anuncioId], references: [id])
+  url       String
+  ordem     Int      @default(0)
+}
+
+// Um agendamento feito por um cliente logado — ver app/api/bookings.
+model Agendamento {
+  id            String            @id @default(cuid())
+  anuncioId     String
+  anuncio       Anuncio           @relation(fields: [anuncioId], references: [id])
+
+  // Nullable só pra não quebrar agendamentos de teste antigos, feitos antes
+  // do login virar obrigatório pra reservar.
+  clienteId       String?
+  cliente         User?           @relation(fields: [clienteId], references: [id])
+  clienteNome     String
+  clienteContato  String
+
+  // Passeio / Adestramento: usa dataHoraInicio + dataHoraFim (horário pontual)
+  // Hospedagem: usa dataHoraInicio (check-in) + dataHoraFim (check-out)
+  dataHoraInicio  DateTime
+  dataHoraFim     DateTime
+
+  status          StatusAgendamento @default(AGUARDANDO_PAGAMENTO)
+  pagamento       Pagamento?
+  criadoEm        DateTime          @default(now())
+
+  // Evita dois agendamentos sobrepostos para o mesmo anúncio
+  @@index([anuncioId, dataHoraInicio, dataHoraFim])
+}
+
+// Registro do pagamento feito via Pagar.me
+model Pagamento {
+  id              String       @id @default(cuid())
+  agendamentoId   String       @unique
+  agendamento     Agendamento  @relation(fields: [agendamentoId], references: [id])
+  idTransacaoPagarme String
+  valor           Float
+  status          String
+  criadoEm        DateTime     @default(now())
+}

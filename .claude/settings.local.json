@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where docker *)",
+      "Bash(where psql *)",
+      "Bash(where postgres *)",
+      "Bash(npm -v)",
+      "Bash(npm install *)",
+      "Bash(npx prisma *)",
+      "Bash(node -e ' *)",
+      "Read(//c/Users/Jefinho/Downloads/**)",
+      "Read(//c/Users/Jefinho/Desktop/**)",
+      "Read(//c/Users/Jefinho/AppData/Local/Temp/claude/**)",
+      "Bash(find \"/c/Users/Jefinho\" -newermt \"-20 minutes\" -iname \"*.png\" 2>/dev/null | grep -v node_modules | head -50)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(rm -f app/api/auth/login/route.ts app/api/auth/logout/route.ts)",
+      "Bash(rmdir app/api/auth/login app/api/auth/logout)",
+      "Bash(curl -s -X POST http://localhost:3000/api/usuario/registrar -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"a@a.com\\\\\"}\")",
+      "Bash(curl -sI --max-time 10 \"https://dog.ceo/api/breeds/image/random\")",
+      "Bash(curl -sI --max-time 10 \"https://placedog.net/500/350?id=1\")",
+      "Bash(curl -sI --max-time 10 \"https://i.pravatar.cc/300\")",
+      "Bash(curl -s --max-time 10 \"https://placedog.net/500/350?id=1\" -o /tmp/test1.jpg)",
+      "Read(//tmp/**)",
+      "Bash(curl -s --max-time 10 \"https://i.pravatar.cc/300?img=12\" -o /tmp/testavatar.jpg)",
+      "Bash(node -e \"require\\('dotenv'\\)\")",
+      "Bash(node --env-file=.env \"C:\\\\Users\\\\Jefinho\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-Jefinho-Desktop-verdog-agendamento\\\\f0b02e9b-bcf0-4210-ae0e-9a52ed8e8549\\\\scratchpad\\\\seed-fotos.js\")",
+      "Bash(node -r dotenv/config seed-fotos.js dotenv_config_path=.env)",
+      "Bash(node --env-file=.env seed-fotos.js)",
+      "Bash(npm run *)"
+    ]
+  }
+}
