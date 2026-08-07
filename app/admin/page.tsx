@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import AprovarBotoes from "@/components/AprovarBotoes";
-import LogoutButton from "@/components/LogoutButton";
+import AppHeader from "@/components/AppHeader";
 
 // TODO: proteger esta rota — só a conta admin pode acessar.
 // Sugestão: usar NextAuth com um papel "admin" no Profissional,
@@ -17,10 +17,11 @@ export default async function PainelAdmin() {
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+      <AppHeader />
+
+      <div className="px-4 py-3 border-b border-neutral-100">
         <h1 className="text-base font-medium">Anúncios pendentes</h1>
-        <LogoutButton />
-      </header>
+      </div>
 
       <ul className="flex flex-col gap-3 px-4 py-4">
         {pendentes.length === 0 && (

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
@@ -10,7 +9,7 @@ import {
   IconAdestramento,
   IconHospedagem,
 } from "@/components/FiltroIcons";
-import HeaderAuth from "@/components/HeaderAuth";
+import AppHeader from "@/components/AppHeader";
 import AnuncioCard from "@/components/AnuncioCard";
 
 const FILTROS = [
@@ -50,10 +49,7 @@ export default async function Home({
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-        <Image src="/logo.png" alt="Verdog" width={1068} height={481} className="h-8 w-auto" priority />
-        <HeaderAuth />
-      </header>
+      <AppHeader />
 
       <nav className="grid grid-cols-2 gap-2 px-4 py-3">
         {FILTROS.map((f) => {

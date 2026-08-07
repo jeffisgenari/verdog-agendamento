@@ -68,11 +68,11 @@ export default function HeaderAuth() {
       {ehProfissional && (
         <Link
           href="/anuncios/novo"
-          aria-label="Adicionar anúncio"
-          title="Adicionar anúncio"
-          className="flex items-center justify-center w-9 h-9 rounded-lg border border-neutral-200 text-neutral-700"
+          title="Anunciar"
+          className="flex items-center gap-1 h-9 px-3 rounded-lg border border-neutral-200 text-neutral-700 text-sm font-medium"
         >
-          <IconMais className="w-5 h-5" />
+          <IconMais className="w-4 h-4" />
+          Anunciar
         </Link>
       )}
 
@@ -80,7 +80,7 @@ export default function HeaderAuth() {
         <button
           onClick={() => setAberto((v) => !v)}
           aria-label="Abrir menu"
-          className="flex items-center justify-center w-9 h-9 rounded-lg border border-neutral-200 text-neutral-700"
+          className="flex items-center justify-center w-9 h-9 rounded-lg bg-verdog text-white"
         >
           <IconMenu className="w-5 h-5" />
         </button>
@@ -106,6 +106,13 @@ export default function HeaderAuth() {
                   className="block px-4 py-2.5 text-sm hover:bg-verdog-pale"
                 >
                   Adicionar anúncio
+                </Link>
+                <Link
+                  href="/meus-anuncios"
+                  onClick={() => setAberto(false)}
+                  className="block px-4 py-2.5 text-sm hover:bg-verdog-pale"
+                >
+                  Meus anúncios
                 </Link>
                 <Link
                   href="/meus-clientes"

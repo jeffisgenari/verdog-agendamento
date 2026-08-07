@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const TIPOS_SERVICO = ["PASSEIO", "ADESTRAMENTO", "HOSPEDAGEM"] as const;
-const LOCAIS_HOSPEDAGEM = ["CASA_PROFISSIONAL", "CASA_DONO"] as const;
 const ZONAS = ["NORTE", "SUL", "LESTE", "OESTE", "CENTRO"] as const;
 const MAX_FOTOS = 8;
 const MAX_NOITES_POR_JANELA = 366;
@@ -72,10 +71,10 @@ export async function POST(request: Request) {
   }
   if (
     tipoServico === "HOSPEDAGEM" &&
-    !LOCAIS_HOSPEDAGEM.includes(localHospedagem)
+    (typeof localHospedagem !== "string" || !localHospedagem.trim())
   ) {
     return NextResponse.json(
-      { error: "Selecione onde é a hospedagem." },
+      { error: "Informe onde é a hospedagem." },
       { status: 400 }
     );
   }
@@ -83,6 +82,13 @@ export async function POST(request: Request) {
   if (!Array.isArray(disponibilidades) || disponibilidades.length === 0) {
     return NextResponse.json(
       { error: "Adicione pelo menos um horário disponível." },
+      { status: 400 }
+    );
+  }
+
+  if (!Array.isArray(fotos) || fotos.length === 0) {
+    return NextResponse.json(
+      { error: "Adicione pelo menos uma foto." },
       { status: 400 }
     );
   }
@@ -121,7 +127,7 @@ export async function POST(request: Request) {
       preco: precoNumero,
       local: local.trim(),
       zona,
-      localHospedagem: tipoServico === "HOSPEDAGEM" ? localHospedagem : null,
+      localHospedagem: tipoServico === "HOSPEDAGEM" ? localHospedagem.trim() : null,
       disponibilidades: { create: slots },
       fotos: {
         create: listaFotos.map((url, ordem) => ({ url, ordem })),

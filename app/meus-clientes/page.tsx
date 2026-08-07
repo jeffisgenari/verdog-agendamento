@@ -7,6 +7,7 @@ import { linkWhatsapp } from "@/lib/whatsapp";
 import Avatar from "@/components/Avatar";
 import StatusBadge from "@/components/StatusBadge";
 import IconWhatsapp from "@/components/IconWhatsapp";
+import AppHeader from "@/components/AppHeader";
 
 export default async function MeusClientes() {
   const session = await getServerSession(authOptions).catch(() => null);
@@ -26,9 +27,7 @@ export default async function MeusClientes() {
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 text-sm text-neutral-500">
-        <a href="/">← Voltar</a>
-      </header>
+      <AppHeader />
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Meus clientes</h1>

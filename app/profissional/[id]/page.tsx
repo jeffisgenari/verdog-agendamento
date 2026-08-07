@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import AnuncioCard from "@/components/AnuncioCard";
+import AppHeader from "@/components/AppHeader";
 
 export default async function PerfilProfissional({
   params,
@@ -24,9 +25,7 @@ export default async function PerfilProfissional({
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 text-sm text-neutral-500">
-        <a href="/">← Voltar</a>
-      </header>
+      <AppHeader />
 
       <div className="flex flex-col items-center gap-2 px-4 pt-8 pb-4">
         <Avatar

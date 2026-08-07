@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import ReservaForm from "@/components/ReservaForm";
 import Avatar from "@/components/Avatar";
 import GaleriaFotos from "@/components/GaleriaFotos";
+import AppHeader from "@/components/AppHeader";
 
 const ZONA_LABEL: Record<string, string> = {
   NORTE: "Zona Norte",
@@ -43,11 +44,7 @@ export default async function PaginaAnuncio({
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
-        <a href="/" className="text-sm text-neutral-500">
-          ← Voltar
-        </a>
-      </header>
+      <AppHeader />
 
       <GaleriaFotos fotos={anuncio.fotos} titulo={anuncio.titulo} />
 
@@ -63,6 +60,13 @@ export default async function PaginaAnuncio({
         <p className="text-sm text-neutral-600 leading-relaxed">
           {anuncio.descricao}
         </p>
+
+        {ehHospedagem && anuncio.localHospedagem && (
+          <p className="text-sm text-neutral-600 mt-2">
+            <span className="font-medium">Onde é: </span>
+            {anuncio.localHospedagem}
+          </p>
+        )}
 
         <Link
           href={`/profissional/${anuncio.profissional.id}`}

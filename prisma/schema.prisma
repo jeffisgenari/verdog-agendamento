@@ -28,11 +28,6 @@ enum StatusAgendamento {
   CANCELADO
 }
 
-enum LocalHospedagem {
-  CASA_PROFISSIONAL
-  CASA_DONO
-}
-
 enum ZonaAnuncio {
   NORTE
   SUL
@@ -149,8 +144,9 @@ model Anuncio {
   // e na página do anúncio.
   local           String
   zona            ZonaAnuncio
-  // Só usado quando tipoServico = HOSPEDAGEM
-  localHospedagem LocalHospedagem?
+  // Só usado quando tipoServico = HOSPEDAGEM — texto livre (ex: "Minha casa,
+  // com quintal cercado").
+  localHospedagem String?
   status          StatusAnuncio   @default(PENDENTE)
   fotos           Foto[]
   disponibilidades Disponibilidade[]

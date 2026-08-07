@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import NovoAnuncioForm from "./NovoAnuncioForm";
+import AppHeader from "@/components/AppHeader";
 
 export default async function NovoAnuncio() {
   const session = await getServerSession(authOptions).catch(() => null);
@@ -11,9 +12,7 @@ export default async function NovoAnuncio() {
 
   return (
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
-      <header className="px-4 py-3 border-b border-neutral-100 text-sm text-neutral-500">
-        <a href="/">← Voltar</a>
-      </header>
+      <AppHeader />
 
       <div className="px-4 pt-6 pb-2">
         <h1 className="text-base font-medium">Novo anúncio</h1>
