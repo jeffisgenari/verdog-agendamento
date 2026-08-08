@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { criarToken } from "@/lib/tokens";
 import { enviarEmailRedefinirSenha } from "@/lib/email";
+import { RateLimit } from "@/lib/ratelimit";
 
 // POST /api/usuario/esqueci-senha — sempre responde "ok" (mesma resposta
 // exista ou não a conta, e mesmo pra contas só-Google sem senha) pra não
@@ -13,6 +14,15 @@ export async function POST(request: Request) {
   }
 
   const emailNormalizado = email.trim().toLowerCase();
+
+  // Por e-mail alvo, não por IP — sem isso, dava pra encher a caixa de
+  // entrada de qualquer pessoa de pedidos de redefinição de senha.
+  if (await RateLimit.esqueciSenha(emailNormalizado)) {
+    return NextResponse.json(
+      { error: "Muitos pedidos pra esse e-mail. Tente novamente mais tarde." },
+      { status: 429 }
+    );
+  }
 
   const usuario = await prisma.user.findUnique({ where: { email: emailNormalizado } }).catch(() => null);
 

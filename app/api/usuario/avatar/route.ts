@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { imagemValida } from "@/lib/imagemValidacao";
 
 export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
@@ -10,7 +11,7 @@ export async function PATCH(request: Request) {
   }
 
   const { image } = await request.json();
-  if (typeof image !== "string" || !image.startsWith("data:image/")) {
+  if (!imagemValida(image)) {
     return NextResponse.json({ error: "Imagem inválida." }, { status: 400 });
   }
 

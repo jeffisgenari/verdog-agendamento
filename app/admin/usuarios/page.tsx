@@ -33,6 +33,9 @@ export default async function AdminUsuarios({
   const usuarios = await prisma.user
     .findMany({
       where: tipoFiltro ? { tipo: tipoFiltro as any } : {},
+      // Só os campos usados na tela — sem trazer senhaHash/cpf/endereço pra
+      // memória do servidor à toa.
+      select: { id: true, name: true, email: true, tipo: true, criadoEm: true, emailVerified: true },
       orderBy: { criadoEm: "desc" },
       take: 100,
     })

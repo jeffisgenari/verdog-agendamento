@@ -72,7 +72,10 @@ export default async function Home({
     <main className="max-w-xl mx-auto min-h-screen border-x border-neutral-100">
       <AppHeader />
 
-      <nav className="grid grid-cols-2 gap-2 px-4 py-3">
+      <div className="px-4 pt-4">
+        <span className="text-xs font-bold text-neutral-500">Estou procurando:</span>
+      </div>
+      <nav className="grid grid-cols-2 gap-2 px-4 pt-1.5 pb-3">
         {FILTROS.map((f) => {
           const ativo = (tipo ?? "TODOS") === f.valor;
           return (
@@ -96,7 +99,10 @@ export default async function Home({
         })}
       </nav>
 
-      <div className="flex items-center justify-between px-4 pb-3">
+      <div className="px-4">
+        <span className="text-xs font-bold text-neutral-500">Onde:</span>
+      </div>
+      <div className="flex items-center justify-between sm:justify-start sm:gap-2 px-4 pt-1.5 pb-3">
         {ZONAS.map((z) => {
           const ativo = (zona ?? "") === z.valor;
           const Icon = "Icon" in z ? z.Icon : null;

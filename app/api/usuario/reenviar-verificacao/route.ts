@@ -4,11 +4,18 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { criarToken } from "@/lib/tokens";
 import { enviarEmailVerificacao } from "@/lib/email";
+import { RateLimit } from "@/lib/ratelimit";
 
 export async function POST() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+  if (await RateLimit.reenviarVerificacao(session.user.id)) {
+    return NextResponse.json(
+      { error: "Muitos pedidos. Tente novamente mais tarde." },
+      { status: 429 }
+    );
   }
 
   const usuario = await prisma.user.findUnique({ where: { id: session.user.id } });

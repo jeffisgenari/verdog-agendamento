@@ -59,6 +59,21 @@ confirma a reserva automaticamente — sem intervenção manual. Se o
 pagamento falha ou expira sem ser feito, o horário é liberado de volta
 pra outra pessoa reservar. Cartão de crédito ainda não existe, só Pix.
 
+## Segurança
+
+- Senhas com hash (bcrypt), nunca em texto puro
+- Sessão via NextAuth (JWT assinado) — cada rota confere dono do recurso
+  antes de deixar editar/cancelar
+- `/admin` protegido em duas camadas (middleware + checagem na página)
+- Limitação de tentativas (login, cadastro, redefinição de senha,
+  reserva) via Upstash Redis — protege contra força bruta, inclusive na
+  conta admin
+- Upload de foto/avatar validado no servidor (tipo e tamanho), não só no
+  navegador
+- Proteção contra redirecionamento aberto em `callbackUrl`
+- Webhook do Pagar.me autenticado com comparação resistente a timing
+  attack
+
 ## Stack técnica
 
 - [Next.js](https://nextjs.org) (App Router) + React + TypeScript
@@ -68,6 +83,8 @@ pra outra pessoa reservar. Cartão de crédito ainda não existe, só Pix.
 - [Pagar.me](https://pagar.me) — pagamento via Pix
 - [Resend](https://resend.com) — e-mails transacionais (recuperação de
   senha, verificação de cadastro)
+- [Upstash Redis](https://upstash.com) — limitação de tentativas (login,
+  cadastro, reserva, etc.), ver `lib/ratelimit.ts`
 - Deploy automático via [Vercel](https://vercel.com)
 
 ## Rodando localmente
@@ -92,6 +109,7 @@ demais variáveis — veja a lista completa abaixo.
 | `PAGARME_SECRET_KEY` | Criar cobranças Pix |
 | `PAGARME_WEBHOOK_USER` / `PAGARME_WEBHOOK_PASSWORD` | Autenticar o webhook que confirma pagamento |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Enviar e-mails transacionais |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Limitação de tentativas — sem essas duas, fica sem essa proteção mas o site funciona normal |
 
 ## Como colocar no ar (passo a passo, sem precisar saber programar)
 

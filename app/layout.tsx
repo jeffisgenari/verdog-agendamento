@@ -1,9 +1,9 @@
-import { Montserrat } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import Footer from "@/components/Footer";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 
 export const metadata = {
   title: "Verdog | Agendamento",
@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${montserrat.className} bg-white text-neutral-900`}>
+      <body className={`${poppins.className} bg-white text-neutral-900`}>
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
         <Footer />
       </body>

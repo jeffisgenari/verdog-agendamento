@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { imagemValida } from "@/lib/imagemValidacao";
 
 const ZONAS = ["NORTE", "SUL", "OESTE", "CENTRO"] as const;
 const MAX_FOTOS = 8;
@@ -113,7 +114,7 @@ export async function PUT(
   }
 
   const novasFotosLista: string[] = Array.isArray(novasFotos) ? novasFotos : [];
-  if (novasFotosLista.some((f) => typeof f !== "string" || !f.startsWith("data:image/"))) {
+  if (novasFotosLista.some((f) => !imagemValida(f))) {
     return NextResponse.json({ error: "Foto inválida." }, { status: 400 });
   }
 

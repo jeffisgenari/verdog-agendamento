@@ -7,6 +7,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import GoogleIcon from "@/components/GoogleIcon";
 import BotaoVoltar from "@/components/BotaoVoltar";
+import { callbackUrlSeguro } from "@/lib/callbackUrl";
 
 const ERRO_LABEL: Record<string, string> = {
   OAuthSignin: "Não foi possível iniciar o login com Google.",
@@ -29,7 +30,7 @@ export default function Login() {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = callbackUrlSeguro(searchParams.get("callbackUrl"));
   const erroOAuth = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -49,7 +50,14 @@ function LoginForm() {
     setCarregando(false);
 
     if (!res || res.error) {
-      setErro("E-mail ou senha inválidos.");
+      // authorize() em lib/auth.ts lança um erro com mensagem específica pra
+      // bloqueio de tentativas — qualquer outra coisa (senha errada mesmo,
+      // etc.) fica com a mensagem genérica de sempre.
+      setErro(
+        res?.error && res.error !== "CredentialsSignin"
+          ? res.error
+          : "E-mail ou senha inválidos."
+      );
       return;
     }
 

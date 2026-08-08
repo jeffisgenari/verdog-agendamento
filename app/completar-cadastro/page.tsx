@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import EscolhaPerfil from "./EscolhaPerfil";
 import AppHeader from "@/components/AppHeader";
+import { callbackUrlSeguro } from "@/lib/callbackUrl";
 
 export default async function CompletarCadastro({
   searchParams,
 }: {
   searchParams: { callbackUrl?: string };
 }) {
-  const callbackUrl = searchParams.callbackUrl || "/";
+  const callbackUrl = callbackUrlSeguro(searchParams.callbackUrl);
   const session = await getServerSession(authOptions).catch(() => null);
 
   if (!session?.user) redirect(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);

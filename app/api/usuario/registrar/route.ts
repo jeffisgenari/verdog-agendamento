@@ -4,8 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { cpfValido } from "@/lib/cpf";
 import { criarToken } from "@/lib/tokens";
 import { enviarEmailVerificacao } from "@/lib/email";
+import { RateLimit, ipDaRequisicao } from "@/lib/ratelimit";
 
 export async function POST(request: Request) {
+  if (await RateLimit.registro(ipDaRequisicao(request.headers))) {
+    return NextResponse.json(
+      { error: "Muitas contas criadas nesse endereço. Tente novamente mais tarde." },
+      { status: 429 }
+    );
+  }
+
   const { nome, email, telefone, cpf, senha, endereco, numero, complemento } =
     await request.json();
 

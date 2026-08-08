@@ -6,6 +6,7 @@ import Image from "next/image";
 import { signIn } from "next-auth/react";
 import BotaoVoltar from "@/components/BotaoVoltar";
 import { formatarCpf, cpfValido } from "@/lib/cpf";
+import { callbackUrlSeguro } from "@/lib/callbackUrl";
 
 export default function Cadastro() {
   return (
@@ -18,7 +19,7 @@ export default function Cadastro() {
 function CadastroForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = callbackUrlSeguro(searchParams.get("callbackUrl"));
 
   const [form, setForm] = useState({
     nome: "",

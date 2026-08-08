@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { cpfValido } from "@/lib/cpf";
 import { criarCobrancaPix } from "@/lib/pagarme";
 import { cancelarAgendamento } from "@/lib/agendamentos";
+import { RateLimit } from "@/lib/ratelimit";
 
 // POST /api/bookings — exige login (ver app/anuncio/[id]/page.tsx).
 // Passeio/adestramento: { anuncioId, disponibilidadeId, clienteNome, clienteContato, clienteCpf }
@@ -15,6 +16,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ erro: "É preciso entrar na conta pra reservar." }, { status: 401 });
   }
   const clienteId = session.user.id;
+
+  if (await RateLimit.reserva(clienteId)) {
+    return NextResponse.json(
+      { erro: "Muitas reservas em pouco tempo. Tente novamente mais tarde." },
+      { status: 429 }
+    );
+  }
 
   const body = await req.json();
   const { anuncioId, disponibilidadeId, checkin, checkout, clienteNome, clienteContato } = body;

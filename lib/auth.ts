@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { RateLimit } from "@/lib/ratelimit";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -21,6 +22,13 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.senha) return null;
         const email = credentials.email.trim().toLowerCase();
+
+        // Barra tentativas repetidas de adivinhar a senha de uma conta
+        // específica (a do admin incluída) — por e-mail, não por IP, pra
+        // não dar pra contornar só trocando de rede.
+        if (await RateLimit.login(email)) {
+          throw new Error("Muitas tentativas. Aguarde alguns minutos e tente de novo.");
+        }
 
         // Conta de admin provisória (sem banco) — ver README.md.
         if (

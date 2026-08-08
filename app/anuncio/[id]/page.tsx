@@ -50,7 +50,7 @@ export default async function PaginaAnuncio({
       <GaleriaFotos fotos={anuncio.fotos} titulo={anuncio.titulo} />
 
       <div className="px-4 py-2">
-        <h1 className="text-2xl font-medium">{anuncio.titulo}</h1>
+        <h1 className="text-2xl font-bold">{anuncio.titulo}</h1>
         <p className="text-xs text-verdog my-1">
           {anuncio.tipoServico === "PASSEIO" && "Passeio"}
           {anuncio.tipoServico === "ADESTRAMENTO" && "Adestramento"}

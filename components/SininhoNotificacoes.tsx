@@ -14,9 +14,8 @@ type Notificacao = {
 
 function IconSino({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2a6 6 0 0 0-6 6c0 4.5-1.5 6-1.5 6h15S18 12.5 18 8a6 6 0 0 0-6-6Z" />
-      <path d="M10 19a2 2 0 0 0 4 0h-4Z" />
+    <svg viewBox="10 3 80 94" fill="currentColor" className={className}>
+      <path d="m20.684 46.652v23.758l-7.2656 12.242c-0.28516 0.48438-0.29297 1.082-0.015625 1.5703 0.27734 0.48828 0.79688 0.78906 1.3594 0.78906h25.102c0.75781 4.9375 4.9961 8.7383 10.137 8.7383s9.3789-3.8008 10.141-8.7344h25.102c0.5625 0 1.082-0.30078 1.3594-0.78906 0.27734-0.48828 0.27344-1.0898-0.015624-1.5703l-7.2695-12.246v-23.758c0-12.848-8.3047-24.066-20.418-27.91 0.34766-0.99219 0.52734-2.0273 0.52734-3.0625 0.003907-5.1992-4.2266-9.4297-9.4258-9.4297s-9.4297 4.2305-9.4297 9.4297c0 1.0352 0.17969 2.0703 0.52734 3.0625-12.113 3.8438-20.414 15.062-20.414 27.91z" />
     </svg>
   );
 }
@@ -66,7 +65,7 @@ export default function SininhoNotificacoes() {
         aria-label="Notificações"
         className="relative flex items-center justify-center w-9 h-9"
       >
-        <IconSino className="w-5 h-5 text-verdog" />
+        <IconSino className="w-6 h-6 text-verdog" />
         {naoLidas && (
           <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white" />
         )}

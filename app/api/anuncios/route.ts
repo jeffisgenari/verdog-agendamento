@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { imagemValida } from "@/lib/imagemValidacao";
 
 const TIPOS_SERVICO = ["PASSEIO", "ADESTRAMENTO", "HOSPEDAGEM"] as const;
 const ZONAS = ["NORTE", "SUL", "OESTE", "CENTRO"] as const;
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
   }
 
   const listaFotos: string[] = Array.isArray(fotos) ? fotos.slice(0, MAX_FOTOS) : [];
-  if (listaFotos.some((f) => typeof f !== "string" || !f.startsWith("data:image/"))) {
+  if (listaFotos.some((f) => !imagemValida(f))) {
     return NextResponse.json({ error: "Foto inválida." }, { status: 400 });
   }
 

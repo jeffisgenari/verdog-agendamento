@@ -23,9 +23,9 @@ export default function AnuncioCard({ a }: { a: AnuncioCardProps }) {
   return (
     <Link
       href={`/anuncio/${a.id}`}
-      className="relative flex gap-3 border border-neutral-100 rounded-2xl p-2"
+      className="flex gap-3 border border-neutral-100 rounded-2xl p-2"
     >
-      <div className="w-32 h-32 rounded-xl bg-verdog-light flex-shrink-0 overflow-hidden self-start">
+      <div className="relative w-32 h-32 rounded-xl bg-verdog-light flex-shrink-0 overflow-hidden self-start">
         {a.fotos[0] && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -34,12 +34,12 @@ export default function AnuncioCard({ a }: { a: AnuncioCardProps }) {
             className="w-full h-full object-cover"
           />
         )}
+        <span className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-verdog text-white flex items-center justify-center text-xl leading-none font-semibold shadow">
+          +
+        </span>
       </div>
-      <span className="absolute bottom-2 right-2 bg-verdog text-white text-[10px] font-medium rounded-full px-2 py-1 shadow">
-        + Reservar
-      </span>
       <div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden">
-        <span className="text-sm font-medium truncate">{a.titulo}</span>
+        <span className="text-sm font-bold truncate">{a.titulo}</span>
         <span className="text-xs text-verdog truncate mt-0.5">
           {a.tipoServico === "PASSEIO" && "Passeio"}
           {a.tipoServico === "ADESTRAMENTO" && "Adestramento"}
@@ -47,9 +47,13 @@ export default function AnuncioCard({ a }: { a: AnuncioCardProps }) {
           {" · "}
           {a.local} · {ZONA_LABEL[a.zona]}
         </span>
-        <span className="text-sm font-medium mt-1">
+        <span className="text-sm font-bold mt-1">
           R$ {a.preco.toFixed(0)}
-          {a.tipoServico === "HOSPEDAGEM" ? " / diária" : ""}
+          {a.tipoServico === "HOSPEDAGEM" ? (
+            <span className="font-normal text-neutral-500"> / diária</span>
+          ) : (
+            ""
+          )}
         </span>
         <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
           <Avatar

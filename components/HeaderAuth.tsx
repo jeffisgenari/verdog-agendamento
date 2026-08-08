@@ -57,7 +57,7 @@ export default function HeaderAuth() {
         href="/login"
         className="bg-verdog text-white text-sm font-medium rounded-lg px-4 py-2"
       >
-        Entrar
+        Cadastre-se
       </Link>
     );
   }
