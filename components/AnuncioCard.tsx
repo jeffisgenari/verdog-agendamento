@@ -25,7 +25,7 @@ export default function AnuncioCard({ a }: { a: AnuncioCardProps }) {
       href={`/anuncio/${a.id}`}
       className="flex gap-3 border border-neutral-100 rounded-2xl p-2"
     >
-      <div className="relative w-32 h-32 rounded-xl bg-verdog-light flex-shrink-0 overflow-hidden self-start">
+      <div className="relative w-20 h-20 rounded-xl bg-verdog-light flex-shrink-0 overflow-hidden self-center">
         {a.fotos[0] && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -34,11 +34,11 @@ export default function AnuncioCard({ a }: { a: AnuncioCardProps }) {
             className="w-full h-full object-cover"
           />
         )}
-        <span className="absolute bottom-1.5 right-1.5 w-8 h-8 rounded-full bg-verdog text-white flex items-center justify-center text-xl leading-none font-semibold shadow">
+        <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-verdog text-white flex items-center justify-center text-[10px] leading-none font-semibold shadow">
           +
         </span>
       </div>
-      <div className="flex flex-col justify-center min-w-0 flex-1 overflow-hidden">
+      <div className="flex flex-col justify-center min-w-0 flex-1 h-20 overflow-hidden">
         <span className="text-sm font-bold truncate">{a.titulo}</span>
         <span className="text-xs text-verdog truncate mt-0.5">
           {a.tipoServico === "PASSEIO" && "Passeio"}
